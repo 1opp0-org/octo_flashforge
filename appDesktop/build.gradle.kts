@@ -23,28 +23,14 @@ dependencies {
     implementation(compose.desktop.currentOs)
 }
 
-
 compose.desktop {
     application {
-        mainClass = "MainKt"
+
+        mainClass = "net.amazingdomain.octo_flashforge.desktop.ui.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "octo_flashforge"
-            packageVersion = "1.0.0"
-        }
-    }
-}
-
-
-compose.desktop {
-    application {
-        mainClass = "net.amazingdomain.octo_flashforge.MainKt"
-//        mainClass = "MainKt"
-
-        nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "demo"
+            packageName = "net.amazingdomain.octo_flashforge.desktop.ui"
             packageVersion = "1.0.0"
         }
     }
