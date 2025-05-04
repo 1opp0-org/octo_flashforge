@@ -10,6 +10,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/appAndroid" />
+            <option value="$PROJECT_DIR$/appDesktop" />
           </set>
         </option>
       </GradleProjectSettings>
