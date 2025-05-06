@@ -3,75 +3,88 @@ package net.amazingdomain.octo_flashforge.android.ui
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import net.amazingdomain.octo_flashforge.android.ui.configuration.ConfigurationRepository
+import net.amazingdomain.octo_flashforge.android.ui.configuration.ScreenConfiguration
+import net.amazingdomain.octo_flashforge.android.ui.video.ScreenVideo
+import net.amazingdomain.octo_flashforge.theme.OctoTheme
 
+// TODO: extract user facing strings into proper file/structure to be shared with Desktop app
+/**
+ * Activity launched at app start
+ */
 class MainActivity : ComponentActivity() {
+
+    lateinit var configurationRepository: ConfigurationRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        configurationRepository = ConfigurationRepository()
 
         setContent {
 
+            OctoTheme {
+                Scaffold(
+                    topBar = TopBar, modifier = Modifier.fillMaxWidth()
+                ) { innerPadding ->
 
-            Scaffold(
-                topBar = TopBar,
-                modifier = Modifier.fillMaxSize()
-            ) { innerPadding ->
-
-                Box(modifier = Modifier.padding(innerPadding)) {
-                    Content()
+                    Box(
+                        modifier = Modifier
+                            .padding(innerPadding)
+                            .fillMaxSize()
+                    ) {
+                        Content()
+                    }
                 }
             }
+
 
         }
 
     }
 
-    private val TopBar: @Composable () -> Unit = {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(100.dp)
+    @Preview(device = "spec:width=300dp,height=300dp")
+    @Composable
+    private fun Content() {
+
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = "Octo Flash Forge")
+
+            configurationRepository.getVideoUrl(this@MainActivity)
+                ?.let {
+                    ScreenVideo(url = it)
+                }
+                ?: Text("No video URL found")
+
+
+
+            ScreenConfiguration()
+
         }
+    }
+
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    private val TopBar: @Composable () -> Unit = {
+
+        TopAppBar(title = { Text("Octo Flash Forge") })
     }
 
     @Preview
     @Composable
     private fun TopBarPreview() {
         TopBar()
-    }
-
-    @Preview
-    @Composable
-    private fun Content() {
-        val count = remember { mutableStateOf(0) }
-        val copy = remember { mutableStateOf("Hello Android") }
-
-        Box(modifier = Modifier.Companion.fillMaxSize()) {
-
-            Button(onClick = {
-
-                count.value++
-                copy.value = "Hello Android! count= ${count.value}"
-
-            }) {
-                Text(copy.value)
-            }
-        }
     }
 }
