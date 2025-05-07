@@ -6,14 +6,9 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-group = "net.amazingdomain.octo_flashforge"
-version = "1.0-SNAPSHOT"
-//
-//repositories {
-//    mavenCentral()
-//    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-//    google()
-//}
+group = libs.versions.octo.maven.group.get()
+version  = libs.versions.octo.maven.version.get()
+
 
 dependencies {
     // Note, if you develop a library, you should use compose.desktop.common.
@@ -30,8 +25,8 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "net.amazingdomain.octo_flashforge.desktop.ui"
-            packageVersion = "1.0.0"
+            packageName = "${libs.versions.octo.maven.group}.desktop.ui"
+            packageVersion = libs.versions.octo.android.versionName.get()
         }
     }
 }

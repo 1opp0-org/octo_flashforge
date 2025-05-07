@@ -1,5 +1,3 @@
-
-
 pluginManagement {
     repositories {
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
@@ -21,5 +19,6 @@ dependencyResolutionManagement {
 
 
 rootProject.name = "octo_flashforge"
-include(":appAndroid", ":appDesktop")
-
+include(":appAndroid", ":appDesktop",
+    ":crossplatform",
+)

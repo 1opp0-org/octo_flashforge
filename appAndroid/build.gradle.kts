@@ -6,15 +6,15 @@ plugins {
 }
 
 android {
-    namespace = "net.amazingdomain.octo_flashforge.android"
-    compileSdk = 35
+    namespace = libs.versions.octo.android.namespace.get()
+    compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "net.amazingdomain.octo_flashforge.android"
-        minSdk = 24
-        targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        applicationId = libs.versions.octo.android.namespace.get()
+        targetSdk = libs.versions.android.targetSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+        versionCode = libs.versions.octo.android.versionCode.get().toInt()
+        versionName = libs.versions.octo.android.versionName.get()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
