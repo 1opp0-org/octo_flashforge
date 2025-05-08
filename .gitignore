@@ -18,6 +18,7 @@ out/
 
 # just ignore everything for now
 .idea/
+!.idea/gradle.xml
 
 ### Eclipse ###
 .apt_generated

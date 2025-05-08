@@ -28,6 +28,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import net.amazingdomain.octo.attempt2.HelloWorld3
 
 // TODO extract user facing strings into proper structure to be shared with Desktop app
 // TODO re-implmement from scratch in Desktop app
@@ -47,6 +48,9 @@ fun ScreenVideo(url: String) {
             .fillMaxWidth()
             .padding(16.dp)
     ) {
+
+      HelloWorld3()
+
         Row(
             modifier = Modifier
                 .padding(vertical = 16.dp)

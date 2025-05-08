@@ -11,6 +11,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import net.amazingdomain.octo.attempt2.HelloWorld3
 import net.amazingdomain.octo_flashforge.android.ui.configuration.ConfigurationRepository
 import net.amazingdomain.octo_flashforge.android.ui.configuration.ScreenConfiguration
 import net.amazingdomain.octo_flashforge.android.ui.video.ScreenVideo
@@ -68,7 +69,7 @@ class MainActivity : ComponentActivity() {
                 }
                 ?: Text("No video URL found")
 
-
+            HelloWorld3()
 
             ScreenConfiguration()
 

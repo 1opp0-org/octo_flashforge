@@ -1,102 +1,45 @@
 plugins {
 
+    alias(libs.plugins.java.library)
+
+    alias(libs.plugins.kotlin.jvm)
+
+    alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlin.compose.multiplatform)
-    alias(libs.plugins.android.library)
-
 }
 
-group = "${libs.versions.octo.maven.group}.multiplatform"
-version = libs.versions.octo.maven.version
+group = "${libs.versions.octo.maven.group.get()}.crossplatform"
+version = libs.versions.octo.gradle.version.get()
 
 
-//fun composeDependency(groupWithArtifact: String) = "$groupWithArtifact:${libs.versions.kotlin}"
-
-kotlin {
-    android(){
-
-
-
-    }
-    jvmToolchain(17)
-
-    jvm("desktop") {
-        compilations.all {
-            kotlinOptions.jvmTarget = "11"
-        }
-    }
-
-//    ios()
-//    iosSimulatorArm64()
-//
-//    cocoapods {
-//        summary = "Some description for the Shared Module"
-//        homepage = "Link to the Shared Module homepage"
-//        version = "1.0"
-//        ios.deploymentTarget = "14.1"
-//        podfile = project.file("../ios/Podfile")
-//        framework {
-//            baseName = "common"
-//            isStatic = true
-//        }
-//    }
-
-
-    sourceSets {
-        val commonMain by getting {
-            dependencies {
-//                api(multiplatform.compose.runtime)
-//                api(compose.foundation)
-//                api(compose.material)
-//                api(libs.image.loader)
-                implementation(libs.multiplatform.compose.util)
-
-
-            }
-        }
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-
-
-            }
-        }
-        val androidMain by getting {
-            dependencies {
-            }
-        }
-        val androidUnitTest by getting {
-            dependencies {
-                implementation(libs.junit)
-            }
-        }
-
-
-        val desktopMain by getting {
-            dependencies {
-//                implementation("uk.co.caprica:vlcj:4.7.0")
-
-            }
-        }
-        val desktopTest by getting
-
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(libs.versions.jvm.get()))
     }
 }
 
+dependencies {
 
-android {
-    namespace = libs.versions.octo.android.namespace.get()
+    // Jetpack Compose for Desktop dependencies
+    // Import the whole desktop target, includes Skiko, Coroutines, etc.
+    implementation(compose.desktop.currentOs) // This brings the core artifacts for the current OS; we could use compose.desktop.common but it doesn't allow for previews
 
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    // Common Compose UI libraries (you'll likely want these)
+    implementation(compose.foundation)      // Core Foundation UI elements
+    implementation(compose.material)        // Material Design components
+    implementation(compose.material3)       // Material Design 3 components (optional, choose one or use both carefully)
+    implementation(compose.ui)              // Core UI
+    implementation(compose.runtime)         // Core Runtime
+    implementation(compose.materialIconsExtended) // For more Material icons (optional)
+    implementation(compose.preview) // For @Preview annotations, if you use IntelliJ's Compose preview features
 
-    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-    defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
-    }
 
+}
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+// Configure the test task to use JUnit Platform (for JUnit 5)
+tasks.withType<Test> {
+    useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
     }
 }

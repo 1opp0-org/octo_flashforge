@@ -23,6 +23,21 @@ Related project is https://github.com/Slugger2k/FlashForgePrinterApi, done in Ja
 | Send gcode to printer                                                         |                     |               |
 | Post process gcode from other slicers to make it compatible with Adventurer 3 |                     | Extruder temp |
 
+# Development
+
+A quick way to check if the project is healthy is:
+
+```bash
+./gradlew :appDesktop:build :appAndroid:assembleDebug    
+
+```
+
+A more complete and longer way is to run all tests:
+
+```bash
+./gradlew :appDesktop:check :appAndroid:check
+```
+
 
 # Android project
 
@@ -57,3 +72,54 @@ See https://github.com/dburckh/Media3Avi/issues/4
 
 
 `ffmpeg -i http://127.0.0.1:9090/?action=stream output.mp4 -r 30 -vcodec libmp4 -b:v 2000k -maxrate 3000k -bufsize 5000k -threads 8 -acodec copy -ab 192k -ar 44100 -ac 1`  
+
+
+# Desktop project
+
+Note: assume for all instructions that you run `alias gw=./gradlew`
+
+
+## Running
+
+The gradle way is `gw :appDesktop:run`
+
+## Distribution
+
+To distribute the project you should run one of the following task:
+
+`gw :appDesktop:packageDeb`
+
+The file will be created at  `./appDesktop/build/compose/binaries/main/deb/octo-flashforge_1.0.0-1_amd64.deb`
+
+### Troubleshooting
+
+It is possible that this command will fail with this message
+
+```
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':appDesktop:checkRuntime'.
+> Failed to check JDK distribution: 'jpackage' is missing
+  JDK distribution path: /home/xxxxxx/android-studio/jbr
+
+
+```
+
+For some reason, Jetbrains java distribution does not include the jpackage tool, which is required to create the deb package. The solution: 
+
+#### the manual way
+- download a full jdk such as Zulu or your preferred one; select the latest version 17.
+- unzip it in any folder you want (just don't add it to your git repo); let's call it ZULU_HOME
+- set the environment variable `JAVA_HOME` to point to the unzipped folder; such as `export JAVA_HOME=$ZULU_HOME`
+- set PATH to your java folder; such as `export PATH=$JAVA_HOME/bin:$PATH`
+- verify it with `which java` and `java -version`
+
+Zulu: https://www.azul.com/downloads/#zulu
+OpenJdk: https://jdk.java.net/archive/
+
+
+#### Mac OS
+
+Use `brew` and `jbr`.
+
