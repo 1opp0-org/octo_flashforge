@@ -14,6 +14,8 @@ dependencies {
     implementation(project(":crossplatform"))
 
     implementation(compose.desktop.currentOs)
+
+    implementation(libs.vlcj) // interfaces binary VLS from desktop
 }
 
 compose.desktop {

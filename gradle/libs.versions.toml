@@ -23,8 +23,9 @@ media3 = "1.3.1" # Added media3 version
 
 # Other libraries
 junit = "4.13.2"
-timber="5.0.1"
-ktor="2.3.4"
+timber = "5.0.1"    # logs
+ktor = "2.3.4"      # networking
+vlcj = "4.11.0"     # plays video over desktop java, using pre-installed vlc
 
 ############################
 # Other
@@ -103,3 +104,4 @@ android-timber = { group = "com.jakewharton.timber", name = "timber", version.re
 ########### Other libraries
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
+vlcj = { module = "uk.co.caprica:vlcj", version.ref = "vlcj" }
