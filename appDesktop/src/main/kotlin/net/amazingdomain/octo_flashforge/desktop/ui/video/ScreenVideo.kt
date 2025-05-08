@@ -1,4 +1,4 @@
-package net.amazingdomain.octo_flashforge.desktop.ui
+package net.amazingdomain.octo_flashforge.desktop.ui.video
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background

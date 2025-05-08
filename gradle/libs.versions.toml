@@ -66,7 +66,7 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 # compose
 jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-#kotlin-compose-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 
 #########################################################
 [libraries]
@@ -103,5 +103,11 @@ android-timber = { group = "com.jakewharton.timber", name = "timber", version.re
 
 ########### Other libraries
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
+ktor-network = { group = "io.ktor", name = "ktor-network", version.ref = "ktor" }
+ktor-io = { group = "io.ktor", name = "ktor-io", version.ref = "ktor" }
+
+kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "compose" }
+
 vlcj = { module = "uk.co.caprica:vlcj", version.ref = "vlcj" }
