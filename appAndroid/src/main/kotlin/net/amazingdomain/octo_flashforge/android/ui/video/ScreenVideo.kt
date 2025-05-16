@@ -28,7 +28,6 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
-import net.amazingdomain.octo.attempt2.HelloWorld3
 
 // TODO extract user facing strings into proper structure to be shared with Desktop app
 // TODO re-implmement from scratch in Desktop app
@@ -41,15 +40,11 @@ import net.amazingdomain.octo.attempt2.HelloWorld3
 @Composable
 fun ScreenVideo(url: String) {
     val isWebView = remember { mutableStateOf(true) }
-
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-
-      HelloWorld3()
 
         Row(
             modifier = Modifier
@@ -92,7 +87,7 @@ fun ScreenVideo(url: String) {
 
         Box(
             modifier = Modifier
-                .requiredHeightIn(max = 500.dp)
+                .requiredHeightIn(max = 700.dp)
                 .background(Color.DarkGray)
                 .padding(2.dp)
                 .background(Color.Gray)
@@ -155,8 +150,8 @@ private fun Video(url: String) {
  *
  * Where socat is being verbose with `-d -d`  (yes)
  * it's listening for a connection on localhost port `9090` (remember emulators and real phones have their own localhost, so
- *     use `ifconfig` to find out the address of your local laptop ;  then edit `network_security_config.xml` to allow http without SSL)
- * `fork` is used to keep socat running, so you can close and reopen the connection as many times as the test needs
+ *     use `ifconfig` to find out the address of your local laptop; then edit `network_security_config.xml` to allow http without SSL)
+ * `fork` is used to keep socat running, so you can close and reopen the connection as many times as the test needs,
  * and it's connected to a video stream at 192.168.0.xxx:8080
  */
 // TODO: detect dropped connection and display some error message
