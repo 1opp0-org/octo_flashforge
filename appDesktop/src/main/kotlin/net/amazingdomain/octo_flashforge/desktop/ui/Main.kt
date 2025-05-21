@@ -12,6 +12,9 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import net.amazingdomain.octo.gcode.MonitorRepository
 import net.amazingdomain.octo.gcode.MonitorUseCase
 import net.amazingdomain.octo.gcode.ScreenMonitor
@@ -45,6 +48,15 @@ fun App() {
 
             Column {
                 ScreenMonitor(temperature)
+                Button(onClick = {
+                    CoroutineScope(Dispatchers.IO)
+                        .launch {
+                            temperature = useCaseMonitorTemperature
+                                .getExtruderTemperature()
+                        }
+                }) {
+                    Text("Refresh Temperature")
+                }
                 ScreenVideo()
             }
 
