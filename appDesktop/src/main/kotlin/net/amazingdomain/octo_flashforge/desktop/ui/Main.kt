@@ -12,16 +12,29 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import net.amazingdomain.octo.gcode.MonitorRepository
+import net.amazingdomain.octo.gcode.MonitorUseCase
 import net.amazingdomain.octo.gcode.ScreenMonitor
 import net.amazingdomain.octo_flashforge.desktop.ui.video.ScreenVideo
 
+private val repository = MonitorRepository(host = "127.0.0.1", port = 8899)
+private val useCaseMonitorTemperature = MonitorUseCase(repository)
 
 @Composable
 @Preview
 fun App() {
     var text by remember { mutableStateOf("Hello, Desktop World!") }
 
+
     MaterialTheme {
+
+        var temperature by remember { mutableStateOf<Int?>(null) }
+
+        LaunchedEffect(Unit ) {
+            temperature = useCaseMonitorTemperature
+                .getExtruderTemperature()
+        }
+
         Column {
 
             Button(onClick = {
@@ -31,7 +44,7 @@ fun App() {
             }
 
             Column {
-                ScreenMonitor()
+                ScreenMonitor(temperature)
                 ScreenVideo()
             }
 

@@ -32,6 +32,12 @@ dependencies {
     implementation(libs.ktor.io)
 
 
+    ///////////////
+    // test
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+
+
 }
 
 // Configure the test task to use JUnit Platform (for JUnit 5)
