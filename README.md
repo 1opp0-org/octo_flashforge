@@ -83,6 +83,20 @@ Note: assume for all instructions that you run `alias gw=./gradlew`
 
 The gradle way is `gw :appDesktop:run`
 
+It assumes you're forwarding to your printer with socat, so the desktop code only points to localhost
+
+Forward the TCP traffic with the following (replace xxx with your correct address):
+
+Data
+```shell
+socat -d -d TCP-LISTEN:8899,mss=1024,fork TCP:192.168.0.xxx:8899,mss=1024
+```
+
+Camera streaming
+```shell
+socat -d -d TCP-LISTEN:9090,mss=1024,fork TCP:192.168.0.xxx:8080,mss=1024
+```
+
 ## Distribution
 
 To distribute the project you should run one of the following task:
