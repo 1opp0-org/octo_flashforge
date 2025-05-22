@@ -1,10 +1,9 @@
 package net.amazingdomain.octo.gcode
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import mu.KotlinLogging
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 fun main() {
 
@@ -12,25 +11,39 @@ fun main() {
 
     logger.debug("Hello network world")
 
-    val repository = MonitorRepository("127.0.0.1", 8899)
+    val socketWatchdogTimeoutMs = 300L
+    val repository = MonitorRepository(
+        host = "127.0.0.1", port = 8899,
+        disconnectTimeoutMs = socketWatchdogTimeoutMs,
+    )
 
     val monitorUseCase = MonitorUseCase(repository)
 
     val mainScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    // Scope for launching coroutines related to this repository
-    // SupervisorJob ensures that if one child coroutine fails, others are not affected.
-    // Dispatchers.IO is appropriate for network operations.
     val job = mainScope.launch {
         monitorUseCase
             .getExtruderTemperature()
             .let {
-                logger.info("*6 Answer is '$it' C | ")
+                logger.info("1st Answer is '$it'C ")
             }
+
+
+        (socketWatchdogTimeoutMs.toFloat() * 1.2f).toLong().toDuration(DurationUnit.MILLISECONDS)
+            .let { delay(it) } // give enough time for disconnection to trigger auto timer
+
+        monitorUseCase
+            .getExtruderTemperature()
+            .let {
+                logger.info("2nd Answer is '$it'C ")
+            }
+
+        repository.disconnect()
     }
 
-    // TODO wait for info to go back and forth
-    Thread.sleep(3000)
+    runBlocking {
+        job.join()
+    }
 
 }
 

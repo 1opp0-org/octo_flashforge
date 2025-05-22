@@ -7,9 +7,10 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import mu.KotlinLogging
 import java.io.IOException
-import java.lang.Thread.sleep
 
 /**
  * Creates a socket that can send and receive data.
@@ -22,39 +23,46 @@ import java.lang.Thread.sleep
  * @param host The hostname or IP address of the TCP server.
  * @param port The port number of the TCP server.
  * @param bufferSize Size of [sharedFlow] buffer
+ * @param disconnectTimeoutMs max time the socket will remain open without write operations
  */
-class MonitorRepository(private val host: String, private val port: Int, private val bufferSize: Int = 100) {
+class MonitorRepository(
+    private val host: String,
+    private val port: Int,
+    private val bufferSize: Int = 100,
+    private val disconnectTimeoutMs: Long = 1000L,
+) {
+
 
     // TODO is this supposed to come from DI?
     private val logger by lazy { KotlinLogging.logger {} }
 
+    private val mutex = Mutex()
+
     private val mutableFlow = MutableSharedFlow<String?>(
-        extraBufferCapacity = bufferSize,
-        onBufferOverflow = BufferOverflow.SUSPEND
+        extraBufferCapacity = bufferSize, onBufferOverflow = BufferOverflow.SUSPEND
     )
 
     /**
      * Emits every line received by the TCP connection, suspending when the buffer is full.
      *
-     * Buffer size is specified on constructor, default is 100.
+     * Buffer size is specified on constructor.
      */
     val sharedFlow: SharedFlow<String?> = mutableFlow
 
     // TODO refactor this data into an internal class and make it single responsibility
     private var socket: Socket? = null
 
-    //    private var socketInput: ByteReadChannel? = null
     private var socketOutput: ByteWriteChannel? = null
-    private var job: Job? = null
+    private var readerJob: Job? = null
+    private var disconnectWatchdogJob: Job? = null
 
     /**
      * Asynchronously start a connection, and returns immediately
      */
     private suspend fun connect() {
 
-        withContext(Dispatchers.IO + SupervisorJob())
-        {
-            job = launch {
+        withContext(Dispatchers.IO + SupervisorJob()) {
+            readerJob = launch {
                 val localSocket = setupSocket()
                 socket = localSocket
                 readData(localSocket)
@@ -73,16 +81,14 @@ class MonitorRepository(private val host: String, private val port: Int, private
                 val socketInput = localSocket.openReadChannel()
 
                 while (!socketInput.isClosedForRead) {
-                    socketInput
-                        .readUTF8Line().toString()
-                        .let {
-                            mutableFlow.emit(it)
-                        }
+                    socketInput.readUTF8Line().toString().let {
+                        mutableFlow.emit(it)
+                    }
                 }
                 logger.debug("Socket is closed naturally")
             }
         } else {
-            logger.error("Socket is closed for some reason!")
+            logger.error("Socket is closed for some unexpected reason!")
         }
     }
 
@@ -120,17 +126,62 @@ class MonitorRepository(private val host: String, private val port: Int, private
      */
     suspend fun disconnect() {
 
-        assert(job != null) {
-            "Job is not active, cannot disconnect"
-        }
-
         logger.info("Disconnect started")
-        socketOutput?.flushAndClose()
-        socket?.close()
-        job?.cancelAndJoin()
+        mutex
+            .withLock {
+
+                socketOutput?.flushAndClose()
+                socket?.close()
+                readerJob?.cancelAndJoin()
+                disconnectWatchdogJob?.cancelAndJoin()
+
+                disconnectWatchdogJob = null
+                readerJob = null
+                socket = null
+            }
         logger.trace("Disconnect finished")
     }
 
+    /**
+     * checks if socket is open
+     *   opens a socket if necessary
+     *   reuses socket if one is available
+     *   resets timer for disconnection
+     *
+     *   thread safe method.
+     */
+    private suspend fun ensureConnection() {
+        mutex.withLock {
+            if (readerJob == null || socket?.isActive != true) {
+                connect()
+                disconnectWatchdogJob = startDisconnectWatchdog()
+            } else {
+                logger.trace("Renew watchdog job")
+                disconnectWatchdogJob?.cancelAndJoin()
+                disconnectWatchdogJob = startDisconnectWatchdog()
+            }
+        }
+    }
+
+    /**
+     * Kicks off asynchronously a watchdog that closes the socket by calling [disconnect] after a period of inactivity.
+     *
+     * This is useful to save resources when the connection is not actively used.
+     *
+     * The watchdog will be cancelled if [sendTextOverTcp] is called.
+
+     *
+     * @return job to be cancelled if data is written
+     */
+    private fun startDisconnectWatchdog(): Job {
+
+        return CoroutineScope(Dispatchers.IO).launch {
+            delay(timeMillis = disconnectTimeoutMs) // 10 minutes of inactivity
+            logger.info { "Disconnect watchdog triggered after $disconnectTimeoutMs ms of inactivity" }
+            disconnect()
+        }
+
+    }
 
     /**
      * Send messages to the connection
@@ -139,7 +190,9 @@ class MonitorRepository(private val host: String, private val port: Int, private
     suspend fun sendTextOverTcp(message: String) {
 
         logger.trace { "Send data 1 '$message'" }
-        connect()
+
+        ensureConnection()
+
         logger.trace("Send data 2")
         // Send the message (ensure it's UTF-8 encoded)
         // Adding a newline is common for text-based protocols
@@ -150,8 +203,7 @@ class MonitorRepository(private val host: String, private val port: Int, private
         } else {
             logger.error("Cannot write to socket")
         }
-        sleep(500) // this is necessary, so we have time for the read coroutine to execute, until a refactor comes
-        disconnect()
+
         logger.trace("Send data 4")
     }
 }
