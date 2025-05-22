@@ -31,6 +31,8 @@ dependencies {
     implementation(libs.ktor.network)
     implementation(libs.ktor.io)
 
+    implementation(libs.kotlin.logging)
+    implementation(libs.slf4j.simple) // this is only needed if you have applications in this module, which you shouldn't
 
     ///////////////
     // test

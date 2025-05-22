@@ -16,6 +16,8 @@ dependencies {
     implementation(compose.desktop.currentOs)
 
     implementation(libs.vlcj) // interfaces binary VLS from desktop
+    implementation(libs.kotlin.logging)
+    implementation(libs.slf4j.simple) // see configuration on simplelogger.properties
 }
 
 compose.desktop {

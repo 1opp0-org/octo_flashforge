@@ -15,6 +15,7 @@ import androidx.compose.ui.window.rememberWindowState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import mu.KotlinLogging
 import net.amazingdomain.octo.gcode.MonitorRepository
 import net.amazingdomain.octo.gcode.MonitorUseCase
 import net.amazingdomain.octo.gcode.ScreenMonitor
@@ -65,6 +66,11 @@ fun App() {
 }
 
 fun main() = application {
+
+    val logger = KotlinLogging.logger {}
+
+    logger.info("Application start")
+
     val windowState = rememberWindowState()
 
     windowState.size = DpSize(800.dp, 900.dp)

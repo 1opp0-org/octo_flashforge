@@ -3,11 +3,13 @@ package net.amazingdomain.octo.gcode
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import mu.KotlinLogging
 import java.io.IOException
+import java.lang.Thread.sleep
 
 /**
  * Creates a socket that can send and receive data.
@@ -17,20 +19,14 @@ import java.io.IOException
  *
  * Send data using [sendTextOverTcp]
  *
- * If you're doing both in same code, make sure to listen first and then send command
- *
- *      withContext(Dispatchers.io) {
- *          launch {
- *              val listen = repository.sharedFlow.map { .... } . collect()
- *
- *              listen.join()
- *      }
- *
  * @param host The hostname or IP address of the TCP server.
  * @param port The port number of the TCP server.
  * @param bufferSize Size of [sharedFlow] buffer
  */
 class MonitorRepository(private val host: String, private val port: Int, private val bufferSize: Int = 100) {
+
+    // TODO is this supposed to come from DI?
+    private val logger by lazy { KotlinLogging.logger {} }
 
     private val mutableFlow = MutableSharedFlow<String?>(
         extraBufferCapacity = bufferSize,
@@ -44,87 +40,124 @@ class MonitorRepository(private val host: String, private val port: Int, private
      */
     val sharedFlow: SharedFlow<String?> = mutableFlow
 
+    // TODO refactor this data into an internal class and make it single responsibility
+    private var socket: Socket? = null
 
-    // TODO convert this into an abstraction that uses one flow to receive commands and another to send them,
-    // then stitches them together and has another abstraction where you send a command and has callback.
-    // then another level where you have a suspend function to send a command and returns a data class with result
+    //    private var socketInput: ByteReadChannel? = null
+    private var socketOutput: ByteWriteChannel? = null
+    private var job: Job? = null
+
     /**
-     * Launches a coroutine to send a text message over TCP.
-     *
-     * @param message The text message to send.
-     * @return A Job representing the launched coroutine. You can use this to cancel the operation
-     *         or join it if you need to wait for its completion from another coroutine.
+     * Asynchronously start a connection, and returns immediately
      */
-    suspend fun sendTextOverTcp(message: String): String? {
+    private suspend fun connect() {
 
-        println("Connecting to TCP $host:$port sending '$message'")
+        assert(job == null) {
+            "Job is active, can't have 2 jobs"
+        }
 
-        val response = mutableListOf<String>()
-        var socket: Socket? = null
-        try {
-            // ActorSelectorManager uses Dispatchers.IO by default if not specified
+        logger.trace("Connect started")
+        withContext(Dispatchers.IO) {
+            logger.trace("**1 ")
+            job = launch(Dispatchers.IO) {
+                logger.trace("**2 ")
+                val localSocket = setupSocket()
+                socket = localSocket
+                logger.trace("**3  isActive ${localSocket?.isActive}")
+                launch { readData(localSocket) }
+                logger.trace("**4 ")
+            }
+        }
+
+        logger.info("Connect Established and read in progress")
+    }
+
+    private fun readData(localSocket: Socket?) {
+
+        if (localSocket?.isActive == true) {
+            localSocket.async {
+
+                val socketInput = localSocket.openReadChannel()
+
+                logger.debug("-- Connection in progress end, starting to read")
+                while (!socketInput.isClosedForRead) {
+                    val r = socketInput.readUTF8Line().toString()
+                    mutableFlow.emit(r)
+                }
+            }
+        } else {
+            logger.error("Socket is closed for some reason!")
+        }
+    }
+
+    private suspend fun setupSocket(): Socket? {
+
+        return try {
+
             val selectorManager = ActorSelectorManager(Dispatchers.IO)
-            socket = aSocket(selectorManager).tcp().connect(host, port) {
-                // You can configure socket options here if needed
-                // e.g., socketTimeout = 10_000
-            }
+            val localSocket = aSocket(selectorManager).tcp().connect(host, port)
+            socketOutput = localSocket.openWriteChannel(autoFlush = true) // autoFlush = true is convenient
 
-            println("Connected to socket")
-            // Get the output channel to write data
-            val output = socket.openWriteChannel(autoFlush = true) // autoFlush = true is convenient
+            logger.info { "*0 Opened socket to '$host:$port'  status = ${localSocket.isActive}" }
 
-            println("*0 Opened socket")
-            // Send the message (ensure it's UTF-8 encoded)
-            // Adding a newline is common for text-based protocols
-            output.writeStringUtf8(message + "\n")
-//            output.flush() // Not needed if autoFlush = true
-
-            println("*1 Successfully sent TCP message: '$message' to $host:$port")
-
-            // If you also need to read a response (optional, not requested but common):
-            val input = socket.openReadChannel()
-
-            while (!input.isClosedForRead) {
-                val r = input.readUTF8Line().toString()
-                println("*3 r= $r")
-                println("*4 response $response")
-                response += r
-                mutableFlow.emit(r)
-            }
-
-
-            if (response != null) {
-                println("Received response: $response")
-            } else {
-                println("No response received or connection closed.")
-            }
+            localSocket
 
         } catch (e: IOException) {
             // Handle specific network I/O errors (e.g., connection refused, host not found)
-            println("Network I/O error sending TCP message to $host:$port: ${e.message}")
+            logger.error { "Network I/O error sending TCP message to $host:$port: ${e.message}" }
+            null
             // e.printStackTrace() // For more detailed debugging
         } catch (e: Exception) {
             // Handle other potential exceptions
-            println("Error sending TCP message to $host:$port: ${e.message}: $e")
+            logger.error { "Error sending TCP message to $host:$port: ${e.message}: $e" }
             e.printStackTrace() // For more detailed debugging
-        } finally {
-            // Ensure the socket is closed
-            try {
-                socket?.close()
-            } catch (e: Exception) {
-                println("Error closing socket: ${e.message}")
-            }
+            null
         }
-        return response
-            .joinToString(separator = ":")
+
     }
 
     /**
      * Call this method when the MonitorRepository is no longer needed
      * to cancel all ongoing coroutines and release resources.
      * This is important to prevent leaks.
+     *
+     * Also, sockets may linger opened even after the application is killed depending on a number of factors.
      */
-    fun dispose() {
-        // TODO
+    suspend fun disconnect() {
+
+        assert(job != null) {
+            "Job is not active, cannot disconnect"
+        }
+
+        logger.info("Disconnect started")
+//        socketInput?.cancel()
+        socketOutput?.flushAndClose()
+        socket?.close()
+        job?.cancelAndJoin()
+        logger.trace("Disconnect finished")
+    }
+
+
+    /**
+     * Send messages to the connection
+     */
+    // TODO skip connect if it's active, add timer to start disconnect if inactive for like 10 minutes
+    suspend fun sendTextOverTcp(message: String) {
+
+        logger.trace { "Send data 1 '$message'" }
+        connect()
+        logger.trace("Send data 2")
+        // Send the message (ensure it's UTF-8 encoded)
+        // Adding a newline is common for text-based protocols
+        assert(socketOutput != null) { "Socket should be initialized now " }
+        if (socket?.isActive == true && socketOutput?.isClosedForWrite != null) {
+            socketOutput?.writeStringUtf8(message + "\n")
+            logger.debug("Send data 3 - write successfully")
+        } else {
+            logger.error("Cannot write to socket")
+        }
+        sleep(500) // this is necessary, so we have time for the read coroutine to execute, until a refactor comes
+        disconnect()
+        logger.trace("Send data 4")
     }
 }

@@ -4,10 +4,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import mu.KotlinLogging
 
 fun main() {
 
-    println("Hello network world")
+    val logger = KotlinLogging.logger {}
+
+    logger.debug("Hello network world")
 
     val repository = MonitorRepository("127.0.0.1", 8899)
 
@@ -22,12 +25,12 @@ fun main() {
         monitorUseCase
             .getExtruderTemperature()
             .let {
-                println("*6 Answer is '$it' C | ")
+                logger.info("*6 Answer is '$it' C | ")
             }
     }
 
-    // TODO wait for job to complete
-    Thread.sleep(1000)
+    // TODO wait for info to go back and forth
+    Thread.sleep(3000)
 
 }
 

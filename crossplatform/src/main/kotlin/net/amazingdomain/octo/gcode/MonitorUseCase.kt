@@ -5,9 +5,12 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import mu.KotlinLogging
 import org.jetbrains.annotations.VisibleForTesting
 
 class MonitorUseCase(private val monitorRepository: MonitorRepository) {
+
+    private val logger = KotlinLogging.logger {}
 
     data class TemperatureQuery(
         val extruderCurrentTemp: Int, val baseCurrentTemp: Int,
@@ -38,7 +41,7 @@ class MonitorUseCase(private val monitorRepository: MonitorRepository) {
             sendJob.cancel()
         }
 
-        println("7*   response $response")
+        logger.debug { "7*   response $response" }
         return response?.extruderCurrentTemp
     }
 
@@ -69,7 +72,7 @@ class MonitorUseCase(private val monitorRepository: MonitorRepository) {
                 )
             }
             ?.also {
-                println("What is this? $it")
+                logger.error { "What is this? $it" }
             }
     }
 
