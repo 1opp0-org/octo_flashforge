@@ -71,9 +71,6 @@ class MonitorUseCase(private val monitorRepository: MonitorRepository) {
                     baseTargetTemp = baseTarget.toInt()
                 )
             }
-            ?.also {
-                logger.error { "What is this? $it" }
-            }
     }
 
 }

@@ -52,26 +52,19 @@ class MonitorRepository(private val host: String, private val port: Int, private
      */
     private suspend fun connect() {
 
-        assert(job == null) {
-            "Job is active, can't have 2 jobs"
-        }
-
-        logger.trace("Connect started")
-        withContext(Dispatchers.IO) {
-            logger.trace("**1 ")
-            job = launch(Dispatchers.IO) {
-                logger.trace("**2 ")
+        withContext(Dispatchers.IO + SupervisorJob())
+        {
+            job = launch {
                 val localSocket = setupSocket()
                 socket = localSocket
-                logger.trace("**3  isActive ${localSocket?.isActive}")
-                launch { readData(localSocket) }
-                logger.trace("**4 ")
+                readData(localSocket)
             }
         }
-
-        logger.info("Connect Established and read in progress")
     }
 
+    /**
+     * Keeps listening to [localSocket] and every time a newline is found, emit a [String] to [sharedFlow]
+     */
     private fun readData(localSocket: Socket?) {
 
         if (localSocket?.isActive == true) {
@@ -79,11 +72,14 @@ class MonitorRepository(private val host: String, private val port: Int, private
 
                 val socketInput = localSocket.openReadChannel()
 
-                logger.debug("-- Connection in progress end, starting to read")
                 while (!socketInput.isClosedForRead) {
-                    val r = socketInput.readUTF8Line().toString()
-                    mutableFlow.emit(r)
+                    socketInput
+                        .readUTF8Line().toString()
+                        .let {
+                            mutableFlow.emit(it)
+                        }
                 }
+                logger.debug("Socket is closed naturally")
             }
         } else {
             logger.error("Socket is closed for some reason!")
@@ -98,18 +94,17 @@ class MonitorRepository(private val host: String, private val port: Int, private
             val localSocket = aSocket(selectorManager).tcp().connect(host, port)
             socketOutput = localSocket.openWriteChannel(autoFlush = true) // autoFlush = true is convenient
 
-            logger.info { "*0 Opened socket to '$host:$port'  status = ${localSocket.isActive}" }
-
+            logger.info { "Socket successful to '$host:$port'  status = ${localSocket.isActive}" }
             localSocket
 
         } catch (e: IOException) {
             // Handle specific network I/O errors (e.g., connection refused, host not found)
-            logger.error { "Network I/O error sending TCP message to $host:$port: ${e.message}" }
+            logger.error { "Socket not successful: Network I/O error sending TCP message to $host:$port: ${e.message}" }
+            e.printStackTrace() // For more detailed debugging
             null
-            // e.printStackTrace() // For more detailed debugging
         } catch (e: Exception) {
             // Handle other potential exceptions
-            logger.error { "Error sending TCP message to $host:$port: ${e.message}: $e" }
+            logger.error { "Socket not successful: Error sending TCP message to $host:$port: ${e.message}: $e" }
             e.printStackTrace() // For more detailed debugging
             null
         }
@@ -130,7 +125,6 @@ class MonitorRepository(private val host: String, private val port: Int, private
         }
 
         logger.info("Disconnect started")
-//        socketInput?.cancel()
         socketOutput?.flushAndClose()
         socket?.close()
         job?.cancelAndJoin()
