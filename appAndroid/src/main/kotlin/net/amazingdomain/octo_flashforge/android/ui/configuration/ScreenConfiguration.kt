@@ -1,6 +1,6 @@
 package net.amazingdomain.octo_flashforge.android.ui.configuration
 
-import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import timber.log.Timber
 
 // TODO convert [Log] to [Timber]
 // TODO extract strings into proper structure to be shared with Desktop app
@@ -26,9 +27,9 @@ import androidx.compose.ui.unit.dp
  */
 @Preview
 @Composable
-fun ScreenConfiguration() {
+fun ScreenConfiguration(onConfigurationChanged: () -> Unit) {
 
-    val configurationRepository = ConfigurationRepository()
+    val configurationRepository = ConfigurationRepository(LocalContext.current.applicationContext)
 
     val context = LocalContext.current
     var ipAddress by remember { mutableStateOf(TextFieldValue("")) }
@@ -36,22 +37,22 @@ fun ScreenConfiguration() {
     var showDialog by remember { mutableStateOf(false) }
 
 
-    LaunchedEffect(Unit ) {
+    LaunchedEffect(Unit) {
         // Load the saved IP address and label when the screen is displayed
-        val (savedLabel, savedIp) = configurationRepository.loadActiveConfiguration(context)
+        val (savedLabel, savedIp) = configurationRepository.loadActiveConfiguration()
             ?: Pair("NONE", "NONE")
         label = TextFieldValue(savedLabel)
         ipAddress = TextFieldValue(savedIp)
-        Log.i("ScreenConfiguration", "LaunchedEffects Loaded saved IP: $savedIp, label: $savedLabel")
+        Timber.i("LaunchedEffects Loaded saved IP: $savedIp, label: $savedLabel")
     }
 
-    Log.i("ScreenConfiguration", "Recomposing the whole thing")
+    Timber.i("Recomposing the whole thing")
 
     Column(modifier = Modifier.padding(16.dp)) {
         OutlinedTextField(
             value = label,
             onValueChange = {
-                Log.i("ScreenConfiguration", "Label changed to: $it")
+                Timber.i("Label changed to: $it")
                 label = it
             },
             label = { Text("Printer Label") },
@@ -66,7 +67,7 @@ fun ScreenConfiguration() {
         )
 
         Button(
-            onClick = { configurationRepository.saveConfiguration(context, label.text, ipAddress.text) },
+            onClick = { configurationRepository.saveConfiguration(label.text, ipAddress.text) },
             modifier = Modifier.padding(bottom = 8.dp)
         ) {
             Text("Save")
@@ -82,12 +83,19 @@ fun ScreenConfiguration() {
     if (showDialog) {
 
         ShowStoredLabels(
-            configurationRepository.loadAllConfigurations(context),
+            configurationRepository.loadAllConfigurations(),
             onSelect = { savedLabel ->
-                configurationRepository.saveActiveLabel(context, savedLabel)
+                configurationRepository.saveActiveLabel(savedLabel)
 
-                val (_, _) = configurationRepository.loadActiveConfiguration(context)
+
+                Toast.makeText(context, "Selected configuration: $savedLabel", Toast.LENGTH_SHORT).show()
+                val (savedLabel, savedIp) = configurationRepository.loadActiveConfiguration()
                     ?: Pair("NONE", "NONE")
+                label = TextFieldValue(savedLabel)
+                ipAddress = TextFieldValue(savedIp)
+
+                onConfigurationChanged()
+
                 showDialog = false
             },
             onDismiss = {

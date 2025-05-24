@@ -10,14 +10,18 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import net.amazingdomain.octo.gcode.MonitorRepository
+import net.amazingdomain.octo.gcode.MonitorUseCase
+import net.amazingdomain.octo.gcode.ScreenMonitor
 import net.amazingdomain.octo_flashforge.android.ui.configuration.ConfigurationRepository
 import net.amazingdomain.octo_flashforge.android.ui.configuration.ScreenConfiguration
 import net.amazingdomain.octo_flashforge.android.ui.video.ScreenVideo
 import net.amazingdomain.octo_flashforge.theme.OctoTheme
+import timber.log.Timber
 
 // TODO: extract user facing strings into proper file/structure to be shared with Desktop app
 /**
@@ -25,12 +29,36 @@ import net.amazingdomain.octo_flashforge.theme.OctoTheme
  */
 class MainActivity : ComponentActivity() {
 
-    lateinit var configurationRepository: ConfigurationRepository
+    private lateinit var configurationRepository: ConfigurationRepository
+
+    private var useCaseMonitorTemperature: MonitorUseCase? = null
+    private var monitorRepository: MonitorRepository? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        configurationRepository = ConfigurationRepository()
+        configurationRepository = ConfigurationRepository(applicationContext = applicationContext)
+
+        monitorRepository = with(configurationRepository) {
+            getGcodeIpAddress() to getGcodeIpPort()
+        }
+            .let {
+                val host = it.first
+                val port = it.second
+                if (host != null && port != null) {
+                    MonitorRepository(
+                        host = host,
+                        port = port,
+                    )
+                } else {
+                    Timber.e("Gcode IP address or port is not set in configuration")
+                    null
+                }
+            }
+
+        monitorRepository
+            ?.let { useCaseMonitorTemperature = MonitorUseCase(monitorRepository = it) }
+
 
         setContent {
 
@@ -66,14 +94,33 @@ class MainActivity : ComponentActivity() {
                     .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
+            var configurationReloadCount by remember { mutableStateOf(0) }
+            var temperature by remember { mutableStateOf<Int?>(null) }
 
-            configurationRepository.getVideoUrl(this@MainActivity)
+            LaunchedEffect(Unit) {
+                temperature = useCaseMonitorTemperature
+                    ?.getExtruderTemperature()
+                    ?: -1
+            }
+
+            ScreenMonitor(temperature)
+
+            configurationRepository.getVideoUrl()
                 ?.let {
-                    ScreenVideo(url = it)
+                        ScreenVideo(url = it)
                 }
                 ?: Text("No video URL found")
 
-            ScreenConfiguration()
+            ScreenConfiguration(
+
+                // TODO we get this notification but we yet don't trigger the updates necessary to both video and monitor
+                onConfigurationChanged = {
+                    configurationReloadCount++
+                    Timber.d("Configuration reloaded: $configurationReloadCount times")
+
+                },
+            )
+
 
         }
     }
