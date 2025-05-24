@@ -12,16 +12,18 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import net.amazingdomain.octo.gcode.MonitorRepository
 import net.amazingdomain.octo.gcode.MonitorUseCase
 import net.amazingdomain.octo.gcode.ScreenMonitor
 import net.amazingdomain.octo_flashforge.desktop.ui.video.ScreenVideo
 
-private val repository = MonitorRepository(host = "127.0.0.1", port = 8899)
+private val statusUpdateIntervalMs = 2000L
+private val repository =
+    MonitorRepository(
+        host = "127.0.0.1", port = 8899,
+        disconnectTimeoutMs = statusUpdateIntervalMs * 2,
+    )
 private val useCaseMonitorTemperature = MonitorUseCase(repository)
 
 @Composable
@@ -29,15 +31,20 @@ private val useCaseMonitorTemperature = MonitorUseCase(repository)
 fun App() {
     var text by remember { mutableStateOf("Hello, Desktop World!") }
 
+    val temperatureState = useCaseMonitorTemperature
+        .getExtruderTemperatureFlow(statusUpdateIntervalMs)
+        .collectAsState(null)
+
 
     MaterialTheme {
 
-        var temperature by remember { mutableStateOf<Int?>(null) }
 
-        LaunchedEffect(Unit ) {
-            temperature = useCaseMonitorTemperature
-                .getExtruderTemperature()
-        }
+//        var temperature by remember { mutableStateOf<Int?>(null) }
+
+//        LaunchedEffect(Unit) {
+//            temperature = useCaseMonitorTemperature
+//                .getExtruderTemperature()
+//        }
 
         Column {
 
@@ -48,16 +55,16 @@ fun App() {
             }
 
             Column {
-                ScreenMonitor(temperature)
-                Button(onClick = {
-                    CoroutineScope(Dispatchers.IO)
-                        .launch {
-                            temperature = useCaseMonitorTemperature
-                                .getExtruderTemperature()
-                        }
-                }) {
-                    Text("Refresh Temperature")
-                }
+                ScreenMonitor(temperatureState.value)
+//                Button(onClick = {
+//                    CoroutineScope(Dispatchers.IO)
+//                        .launch {
+//                            temperature = useCaseMonitorTemperature
+//                                .getExtruderTemperature()
+//                        }
+//                }) {
+//                    Text("Refresh Temperature")
+//                }
                 ScreenVideo()
             }
 

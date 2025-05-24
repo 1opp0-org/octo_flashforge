@@ -1,10 +1,9 @@
 package net.amazingdomain.octo.gcode
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import org.jetbrains.annotations.VisibleForTesting
 
@@ -16,6 +15,21 @@ class MonitorUseCase(private val monitorRepository: MonitorRepository) {
         val extruderCurrentTemp: Int, val baseCurrentTemp: Int,
         val extruderTargetTemp: Int, val baseTargetTemp: Int,
     )
+
+    fun getExtruderTemperatureFlow(intervalMs: Long): Flow<Int?> {
+
+
+        return flow {
+            while (true) {
+
+                val temp = getExtruderTemperature()
+                emit(temp)
+                delay(intervalMs)
+            }
+
+        }
+    }
+
 
     // TODO refactor and clean code, it can be much better
     suspend fun getExtruderTemperature(): Int? {
