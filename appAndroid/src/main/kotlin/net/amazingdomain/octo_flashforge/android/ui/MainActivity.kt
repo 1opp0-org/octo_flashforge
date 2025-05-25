@@ -14,7 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import net.amazingdomain.octo.gcode.MonitorRepository
+import net.amazingdomain.octo.networking.ClientSocket
 import net.amazingdomain.octo.gcode.MonitorUseCase
 import net.amazingdomain.octo.gcode.ScreenMonitor
 import net.amazingdomain.octo_flashforge.android.ui.configuration.ConfigurationRepository
@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var configurationRepository: ConfigurationRepository
 
     private var useCaseMonitorTemperature: MonitorUseCase? = null
-    private var monitorRepository: MonitorRepository? = null
+    private var monitorRepository: ClientSocket? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,7 +46,7 @@ class MainActivity : ComponentActivity() {
                 val host = it.first
                 val port = it.second
                 if (host != null && port != null) {
-                    MonitorRepository(
+                    ClientSocket(
                         host = host,
                         port = port,
                     )

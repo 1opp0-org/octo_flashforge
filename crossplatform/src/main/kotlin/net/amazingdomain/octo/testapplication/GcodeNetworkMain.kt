@@ -1,7 +1,9 @@
-package net.amazingdomain.octo.gcode
+package net.amazingdomain.octo.testapplication
 
 import kotlinx.coroutines.*
 import mu.KotlinLogging
+import net.amazingdomain.octo.networking.ClientSocket
+import net.amazingdomain.octo.gcode.MonitorUseCase
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -12,7 +14,7 @@ fun main() {
     logger.debug("Hello network world")
 
     val socketWatchdogTimeoutMs = 300L
-    val repository = MonitorRepository(
+    val repository = ClientSocket(
         host = "127.0.0.1", port = 8899,
         disconnectTimeoutMs = socketWatchdogTimeoutMs,
     )

@@ -13,14 +13,14 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import mu.KotlinLogging
-import net.amazingdomain.octo.gcode.MonitorRepository
+import net.amazingdomain.octo.networking.ClientSocket
 import net.amazingdomain.octo.gcode.MonitorUseCase
 import net.amazingdomain.octo.gcode.ScreenMonitor
 import net.amazingdomain.octo_flashforge.desktop.ui.video.ScreenVideo
 
 private val statusUpdateIntervalMs = 2000L
 private val repository =
-    MonitorRepository(
+    ClientSocket(
         host = "127.0.0.1", port = 8899,
         disconnectTimeoutMs = statusUpdateIntervalMs * 2,
     )
@@ -39,13 +39,6 @@ fun App() {
     MaterialTheme {
 
 
-//        var temperature by remember { mutableStateOf<Int?>(null) }
-
-//        LaunchedEffect(Unit) {
-//            temperature = useCaseMonitorTemperature
-//                .getExtruderTemperature()
-//        }
-
         Column {
 
             Button(onClick = {
@@ -56,15 +49,7 @@ fun App() {
 
             Column {
                 ScreenMonitor(temperatureState.value)
-//                Button(onClick = {
-//                    CoroutineScope(Dispatchers.IO)
-//                        .launch {
-//                            temperature = useCaseMonitorTemperature
-//                                .getExtruderTemperature()
-//                        }
-//                }) {
-//                    Text("Refresh Temperature")
-//                }
+
                 ScreenVideo()
             }
 

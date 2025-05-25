@@ -1,6 +1,7 @@
 package net.amazingdomain.octo.gcode
 
 import io.mockk.mockk
+import net.amazingdomain.octo.gcode.MonitorUseCase
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

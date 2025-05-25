@@ -1,13 +1,19 @@
 package net.amazingdomain.octo.gcode
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import mu.KotlinLogging
+import net.amazingdomain.octo.networking.ClientSocket
+import net.amazingdomain.octo.testapplication.GCode
 import org.jetbrains.annotations.VisibleForTesting
 
-class MonitorUseCase(private val monitorRepository: MonitorRepository) {
+class MonitorUseCase(private val monitorRepository: ClientSocket) {
 
     private val logger = KotlinLogging.logger {}
 
@@ -49,7 +55,7 @@ class MonitorUseCase(private val monitorRepository: MonitorRepository) {
                     }
             }
 
-            val sendJob = launch { monitorRepository.sendTextOverTcp(GCode.readTemperature.code) }
+            val sendJob = launch { monitorRepository.sendTextOverTcp(GCode.Companion.readTemperature.code) }
 
             receiveJob.join() // Wait for the response to be received and processed
             sendJob.cancel()
