@@ -112,7 +112,8 @@ class ClientSocket(
 
             val selectorManager = ActorSelectorManager(Dispatchers.IO)
             val localSocket = aSocket(selectorManager).tcp().connect(host, port)
-            socketOutput = localSocket.openWriteChannel(autoFlush = true) // autoFlush = true is convenient
+            socketOutput =
+                localSocket.openWriteChannel(autoFlush = true) // autoFlush = true is convenient
 
             logger.info { "Socket successful to '$host:$port'  status = ${localSocket.isActive}" }
             localSocket
@@ -164,7 +165,7 @@ class ClientSocket(
      *
      *   thread safe method.
      */
-    private suspend fun ensureConnection() {
+    suspend fun ensureConnection() {
         mutex.withLock {
             if (readerJob == null || socket?.isActive != true) {
                 connect()

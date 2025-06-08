@@ -14,6 +14,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import net.amazingdomain.octo.networking.ClientSocket
 import net.amazingdomain.octo.gcode.MonitorUseCase
 import net.amazingdomain.octo.gcode.ScreenMonitor
@@ -38,6 +41,23 @@ class MainActivity : ComponentActivity() {
 
     private var useCaseMonitorTemperature: MonitorUseCase? = null
     private var monitorRepository: ClientSocket? = null
+
+    // TODO find a way to reconnect on resume
+    override fun onResume() {
+        super.onResume()
+        CoroutineScope(Dispatchers.IO)
+            .launch {
+                monitorRepository?.ensureConnection()
+            }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        CoroutineScope(Dispatchers.IO)
+            .launch {
+                monitorRepository?.disconnect()
+            }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
