@@ -97,6 +97,16 @@ Camera streaming
 socat -d -d TCP-LISTEN:9090,mss=1024,fork TCP:192.168.0.xxx:8080,mss=1024
 ```
 
+### Fat jar
+
+You can build a fat jar with 
+
+`gw :appDesktop:packageUberJarForCurrentOS`
+
+and then run it with 
+
+`java -jar ./appDesktop/build/compose/jars/net.amazingdomain.octo_flashforge-linux-x64-1.0.0.jar`
+
 ## Distribution
 
 To distribute the project you should run one of the following task:
