@@ -1,0 +1,11 @@
+name: Hello World Workflow
+
+on: [push] # You can change this to trigger on other events like pull_request, schedule, etc.
+
+jobs:
+  say_hello:
+    runs-on: ubuntu-latest # Specifies the runner environment
+    steps:
+      - name: Print Hello World
+        run: echo "hello world"
+
