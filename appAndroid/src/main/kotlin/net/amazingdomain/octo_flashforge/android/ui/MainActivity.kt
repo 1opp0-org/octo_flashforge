@@ -29,6 +29,11 @@ import timber.log.Timber
  */
 class MainActivity : ComponentActivity() {
 
+    companion object {
+        const val MONITOR_INTERVAL_MS = 1000L
+        const val DISCONNECT_TIMEOUT_MS = MONITOR_INTERVAL_MS * 2
+    }
+
     private lateinit var configurationRepository: ConfigurationRepository
 
     private var useCaseMonitorTemperature: MonitorUseCase? = null
@@ -49,6 +54,7 @@ class MainActivity : ComponentActivity() {
                     ClientSocket(
                         host = host,
                         port = port,
+                        disconnectTimeoutMs = DISCONNECT_TIMEOUT_MS
                     )
                 } else {
                     Timber.e("Gcode IP address or port is not set in configuration")
@@ -86,6 +92,10 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun Content() {
 
+        val temperature = useCaseMonitorTemperature
+            ?.getExtruderTemperatureFlow(MONITOR_INTERVAL_MS)
+            ?.collectAsState(null)
+
         Column(
             modifier =
                 Modifier
@@ -95,19 +105,12 @@ class MainActivity : ComponentActivity() {
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
             var configurationReloadCount by remember { mutableStateOf(0) }
-            var temperature by remember { mutableStateOf<Int?>(null) }
 
-            LaunchedEffect(Unit) {
-                temperature = useCaseMonitorTemperature
-                    ?.getExtruderTemperature()
-                    ?: -1
-            }
-
-            ScreenMonitor(temperature)
+            ScreenMonitor(temperature?.value)
 
             configurationRepository.getVideoUrl()
                 ?.let {
-                        ScreenVideo(url = it)
+                    ScreenVideo(url = it)
                 }
                 ?: Text("No video URL found")
 

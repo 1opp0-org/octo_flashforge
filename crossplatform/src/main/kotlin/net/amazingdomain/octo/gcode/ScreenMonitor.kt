@@ -17,8 +17,8 @@ fun ScreenMonitor(temperature: Int?) {
 
         Column {
 
-            Text("Hello monitor")
-            Text("Temperature = $temperature")
+            Text("Hello monitor from crossplatform")
+            Text("Temperature = " + (temperature ?: "unknown"))
         }
     }
 

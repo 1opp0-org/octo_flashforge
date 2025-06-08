@@ -1,6 +1,7 @@
 package net.amazingdomain.octo.testapplication
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.first
 import mu.KotlinLogging
 import net.amazingdomain.octo.networking.ClientSocket
 import net.amazingdomain.octo.gcode.MonitorUseCase
@@ -25,7 +26,8 @@ fun main() {
 
     val job = mainScope.launch {
         monitorUseCase
-            .getExtruderTemperature()
+            .getExtruderTemperatureFlow(1000L)
+            .first()
             .let {
                 logger.info("1st Answer is '$it'C ")
             }
@@ -35,7 +37,8 @@ fun main() {
             .let { delay(it) } // give enough time for disconnection to trigger auto timer
 
         monitorUseCase
-            .getExtruderTemperature()
+            .getExtruderTemperatureFlow(1000L)
+            .first()
             .let {
                 logger.info("2nd Answer is '$it'C ")
             }

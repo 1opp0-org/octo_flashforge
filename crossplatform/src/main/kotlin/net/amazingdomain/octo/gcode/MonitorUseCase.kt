@@ -22,14 +22,14 @@ class MonitorUseCase(private val monitorRepository: ClientSocket) {
         val extruderTargetTemp: Int, val baseTargetTemp: Int,
     )
 
-    fun getExtruderTemperatureFlow(intervalMs: Long): Flow<Int?> {
-
+    fun getExtruderTemperatureFlow(intervalMs: Long = 500L): Flow<Int?> {
 
         return flow {
             while (true) {
 
                 val temp = getExtruderTemperature()
                 emit(temp)
+                logger.info { "Temperature reading is $temp" }
                 delay(intervalMs)
             }
 
@@ -38,7 +38,7 @@ class MonitorUseCase(private val monitorRepository: ClientSocket) {
 
 
     // TODO refactor and clean code, it can be much better
-    suspend fun getExtruderTemperature(): Int? {
+    private suspend fun getExtruderTemperature(): Int? {
 
         var response: TemperatureQuery? = null
 
@@ -55,7 +55,8 @@ class MonitorUseCase(private val monitorRepository: ClientSocket) {
                     }
             }
 
-            val sendJob = launch { monitorRepository.sendTextOverTcp(GCode.Companion.readTemperature.code) }
+            val sendJob =
+                launch { monitorRepository.sendTextOverTcp(GCode.Companion.readTemperature.code) }
 
             receiveJob.join() // Wait for the response to be received and processed
             sendJob.cancel()
@@ -73,7 +74,7 @@ class MonitorUseCase(private val monitorRepository: ClientSocket) {
      *
      */
     @VisibleForTesting
-    fun parseResponse(gcodeResponse: String?): TemperatureQuery? {
+    internal fun parseResponse(gcodeResponse: String?): TemperatureQuery? {
 
         if (gcodeResponse == null) return null
 
