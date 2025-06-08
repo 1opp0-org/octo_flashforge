@@ -1,17 +1,27 @@
 package net.amazingdomain.octo_flashforge.android.ui.video
 
-import android.util.Log
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.webkit.WebView
 import android.widget.FrameLayout
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeightIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderState
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
@@ -20,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -28,6 +39,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import timber.log.Timber
 
 // TODO extract user facing strings into proper structure to be shared with Desktop app
 // TODO re-implmement from scratch in Desktop app
@@ -35,7 +47,6 @@ import androidx.media3.ui.PlayerView
  * This video provides 2 ways to display from a URL, one with Exoplayer through [Video] and another fallback
  * using [WebViewVideo]. It displays a button at the top to let the user choose.
  */
-@Preview
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScreenVideo(url: String) {
@@ -93,22 +104,39 @@ fun ScreenVideo(url: String) {
                 .background(Color.Gray)
         ) {
 
-            if (isWebView.value) {
-                WebViewVideo(url)
-            } else {
-                Video(url)
+            when {
+                LocalInspectionMode.current -> VideoPreview()
+                isWebView.value -> WebViewVideo(url)
+                else -> Video(url)
             }
+
 
         }
     }
 
 }
 
+@Composable
+private fun VideoPreview() {
+    Box(
+        modifier = Modifier
+            .size(200.dp)
+            .background(Color.DarkGray)
+            .padding(2.dp)
+            .background(Color.Gray)
+    ) {
+        Text(
+            text = "Video preview",
+            style = typography.bodySmall,
+            modifier = Modifier.align(Alignment.Center),
+        )
+    }
+}
+
 /**
  * Play video from a url
  */
 @OptIn(UnstableApi::class)
-@Preview
 @Composable
 private fun Video(url: String) {
     val context = LocalContext.current
@@ -158,7 +186,6 @@ private fun Video(url: String) {
 @Composable
 private fun WebViewVideo(url: String, modifier: Modifier = Modifier) {
 
-
     AndroidView(
         modifier = modifier
             .verticalScroll(rememberScrollState()),
@@ -178,14 +205,14 @@ private fun WebViewVideo(url: String, modifier: Modifier = Modifier) {
                 }
             }
         }, update = {
-            Log.i("WebViewVideo", "update")
+            Timber.i("update")
             it.loadUrl(url)
         },
         onReset = {
-            Log.i("WebViewVideo", "reset")
+            Timber.i("reset")
         },
         onRelease = {
-            Log.i("WebViewVideo", "release")
+            Timber.i("release")
             it.apply {
 
                 stopLoading()
@@ -220,4 +247,10 @@ fun MySlider(content: @Composable (sliderValue: Float) -> Unit) {
 
         content(sliderState.value)
     }
+}
+
+@Preview
+@Composable
+private fun ScreenVideoPreview() {
+    ScreenVideo("https://example.com/video.mp4")
 }

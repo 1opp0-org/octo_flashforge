@@ -4,7 +4,7 @@
    height="200"
    version="1.1"
    id="svg58"
-   sodipodi:docname="logo3.svg"
+   sodipodi:docname="logo.svg"
    inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -23,8 +23,8 @@
      inkscape:deskcolor="#d1d1d1"
      showgrid="false"
      inkscape:zoom="5.12"
-     inkscape:cx="99.902344"
-     inkscape:cy="100"
+     inkscape:cx="69.726562"
+     inkscape:cy="107.8125"
      inkscape:window-width="1920"
      inkscape:window-height="1168"
      inkscape:window-x="0"
@@ -33,16 +33,16 @@
      inkscape:current-layer="svg58" />
   <!-- head / body -->
   <circle
-     cx="100"
-     cy="100"
-     r="30"
-     fill="darkorange"
-     id="circle2" />
-
+     cx="99.098206"
+     cy="65.34166"
+     r="43.832172"
+     fill="#ff8c00"
+     id="g_body"
+     style="stroke-width:1.46107;fill:#ff6600" />
   <!-- Tentacle 1 -->
   <g
-     id="g346"
-     transform="translate(-2.7749538,0.47941208)">
+     id="g_t4"
+     transform="matrix(1.4610725,0,0,1.4610725,-51.063455,-80.065136)">
     <ellipse
        cx="72.294037"
        cy="155.45325"
@@ -78,7 +78,8 @@
   </g>
   <!-- Tentacle 2 -->
   <g
-     id="g409">
+     id="g_t5"
+     transform="matrix(1.4610725,0,0,1.4610725,-47.009046,-80.765593)">
     <ellipse
        cx="123.21025"
        cy="105.17479"
@@ -114,42 +115,47 @@
   </g>
   <!-- Tentacle 3 -->
   <g
-     id="g377">
+     id="g_t3">
     <ellipse
-       cx="120"
-       cy="120"
-       rx="8"
-       ry="12"
-       fill="orange"
-       transform="rotate(-15, 120, 120)"
-       id="ellipse24" />
+       cx="99.472542"
+       cy="124.55252"
+       rx="11.688581"
+       ry="17.532871"
+       fill="#ffa500"
+       transform="rotate(-15)"
+       id="ellipse100"
+       style="stroke-width:1.46107" />
     <ellipse
-       cx="125"
-       cy="135"
-       rx="6"
-       ry="10"
-       fill="orange"
-       transform="rotate(-15, 125, 135)"
-       id="ellipse26" />
+       cx="100.85667"
+       cy="147.61261"
+       rx="8.7664356"
+       ry="14.610725"
+       fill="#ffa500"
+       transform="rotate(-15)"
+       id="ellipse26"
+       style="stroke-width:1.46107" />
     <ellipse
-       cx="130"
-       cy="150"
-       rx="4"
-       ry="8"
-       fill="orange"
-       transform="rotate(-15, 130, 150)"
-       id="ellipse28" />
+       cx="102.24081"
+       cy="170.67268"
+       rx="5.8442903"
+       ry="11.688581"
+       fill="#ffa500"
+       transform="rotate(-15)"
+       id="ellipse28"
+       style="stroke-width:1.46107" />
     <ellipse
-       cx="137"
-       cy="161"
-       rx="2"
-       ry="6"
-       fill="orange"
-       transform="rotate(-29, 135, 165)"
-       id="ellipse30" />
+       cx="56.600788"
+       cy="207.20293"
+       rx="2.9221449"
+       ry="8.7664347"
+       fill="#ffa500"
+       transform="rotate(-29)"
+       id="ellipse30"
+       style="stroke-width:1.46107" />
   </g>
   <g
-     id="g667">
+     id="g_t2"
+     transform="matrix(1.4610725,0,0,1.4610725,-47.009046,-80.765593)">
     <ellipse
        cx="48.942677"
        cy="163.89923"
@@ -185,8 +191,8 @@
   </g>
   <!-- Tentacle 4 -->
   <g
-     id="g415"
-     transform="translate(-3.4152746,2.5219321)">
+     id="g_t6"
+     transform="matrix(1.4610725,0,0,1.4610725,-51.99901,-77.080867)">
     <ellipse
        cx="80"
        cy="120"
@@ -223,7 +229,8 @@
   </g>
   <!-- Tentacle 5 -->
   <g
-     id="g661">
+     id="g_t1"
+     transform="matrix(1.4610725,0,0,1.4610725,-47.009046,-80.765593)">
     <ellipse
        cx="-93.493004"
        cy="131.83781"
@@ -258,7 +265,8 @@
        id="ellipse30-2" />
   </g>
   <g
-     id="g655">
+     id="g_t7"
+     transform="matrix(1.4610725,0,0,1.4610725,-47.009046,-80.765593)">
     <ellipse
        cx="-119.66399"
        cy="28.80673"
@@ -293,7 +301,8 @@
        id="ellipse30-0" />
   </g>
   <g
-     id="g927">
+     id="g_t8"
+     transform="matrix(1.4610725,0,0,1.4610725,-47.009046,-80.765593)">
     <ellipse
        cx="-88.26088"
        cy="-62.883751"
@@ -328,32 +337,34 @@
        id="ellipse30-7" />
   </g>
   <g
-     id="g873">
+     id="group_eyes">
     <circle
-       cx="90"
-       cy="90"
-       r="6"
-       fill="black"
-       id="circle4" />
+       cx="84.48748"
+       cy="50.73093"
+       r="8.7664347"
+       fill="#000000"
+       id="circle4"
+       style="stroke-width:1.46107" />
     <circle
-       cx="110"
-       cy="90"
-       r="6"
-       fill="black"
-       id="circle6" />
+       cx="113.70893"
+       cy="50.73093"
+       r="8.7664347"
+       fill="#000000"
+       id="circle6"
+       style="stroke-width:1.46107" />
     <circle
-       cx="90"
-       cy="99"
+       cx="84.48748"
+       cy="63.880585"
        fill="#ff8c00"
        id="circle2-9"
-       r="8.5"
-       style="stroke-width:0.28841" />
+       r="12.419116"
+       style="stroke-width:0.421388;fill:#ff6600" />
     <circle
-       cx="110"
-       cy="99"
+       cx="113.70893"
+       cy="63.880585"
        fill="#ff8c00"
        id="circle2-9-2"
-       r="8.5"
-       style="stroke-width:0.28841" />
+       r="12.419116"
+       style="stroke-width:0.421388;fill:#ff6600" />
   </g>
 </svg>

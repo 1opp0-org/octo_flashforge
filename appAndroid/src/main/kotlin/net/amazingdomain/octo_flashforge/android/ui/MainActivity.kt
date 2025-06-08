@@ -62,6 +62,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // TODO this should be done by hilt
         configurationRepository = ConfigurationRepository(applicationContext = applicationContext)
 
         monitorRepository = with(configurationRepository) {
@@ -82,11 +83,16 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-        monitorRepository
-            ?.let { useCaseMonitorTemperature = MonitorUseCase(monitorRepository = it) }
-
-
         setContent {
+
+            val temperatureState = monitorRepository
+                ?.let { MonitorUseCase(monitorRepository = it) }
+                ?.getExtruderTemperatureFlow(MONITOR_INTERVAL_MS)
+                ?.collectAsState(null)
+
+            val videoUrlState = remember {
+                mutableStateOf(configurationRepository.getVideoUrl())
+            }
 
             OctoTheme {
                 Scaffold(
@@ -98,7 +104,11 @@ class MainActivity : ComponentActivity() {
                             .padding(innerPadding)
                             .fillMaxSize()
                     ) {
-                        Content()
+
+                        ScreenMain(
+                            temperatureState = temperatureState,
+                            videoUrlState = videoUrlState,
+                        )
                     }
                 }
             }
@@ -107,47 +117,6 @@ class MainActivity : ComponentActivity() {
         }
 
     }
-
-    @Preview(device = "spec:width=300dp,height=300dp")
-    @Composable
-    private fun Content() {
-
-        val temperature = useCaseMonitorTemperature
-            ?.getExtruderTemperatureFlow(MONITOR_INTERVAL_MS)
-            ?.collectAsState(null)
-
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(800.dp)
-                    .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.SpaceBetween,
-        ) {
-            var configurationReloadCount by remember { mutableStateOf(0) }
-
-            ScreenMonitor(temperature?.value)
-
-            configurationRepository.getVideoUrl()
-                ?.let {
-                    ScreenVideo(url = it)
-                }
-                ?: Text("No video URL found")
-
-            ScreenConfiguration(
-
-                // TODO we get this notification but we yet don't trigger the updates necessary to both video and monitor
-                onConfigurationChanged = {
-                    configurationReloadCount++
-                    Timber.d("Configuration reloaded: $configurationReloadCount times")
-
-                },
-            )
-
-
-        }
-    }
-
 
     @OptIn(ExperimentalMaterial3Api::class)
     private val TopBar: @Composable () -> Unit = {
