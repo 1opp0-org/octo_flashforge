@@ -14,6 +14,7 @@ dependencies {
     implementation(project(":crossplatform"))
 
     implementation(compose.desktop.currentOs)
+    implementation(compose.components.resources)
 
     implementation(libs.vlcj) // interfaces binary VLS from desktop
     implementation(libs.kotlin.logging)

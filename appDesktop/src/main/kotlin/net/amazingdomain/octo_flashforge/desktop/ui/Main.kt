@@ -1,11 +1,17 @@
 package net.amazingdomain.octo_flashforge.desktop.ui
 
+
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -13,10 +19,14 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import mu.KotlinLogging
-import net.amazingdomain.octo.networking.ClientSocket
 import net.amazingdomain.octo.gcode.MonitorUseCase
 import net.amazingdomain.octo.gcode.ScreenMonitor
+import net.amazingdomain.octo.networking.ClientSocket
 import net.amazingdomain.octo_flashforge.desktop.ui.video.ScreenVideo
+import net.amazingdomain.octo_flashforge.crossplatform.ui.resources.Res
+import net.amazingdomain.octo_flashforge.crossplatform.ui.resources.logo
+import org.jetbrains.compose.resources.painterResource
+
 
 private val statusUpdateIntervalMs = 2000L
 private val repository =
@@ -37,7 +47,6 @@ fun App() {
 
 
     MaterialTheme {
-
 
         Column {
 
@@ -72,6 +81,7 @@ fun main() = application {
         title = "Octo Flashforge",
         state = windowState,
         onCloseRequest = ::exitApplication,
+        icon = painterResource(Res.drawable.logo),
     ) {
         App()
     }

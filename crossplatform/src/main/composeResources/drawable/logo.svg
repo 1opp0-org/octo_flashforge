@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="200"
+   height="200"
+   version="1.1"
+   id="svg58"
+   sodipodi:docname="logo3.svg"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs62" />
+  <sodipodi:namedview
+     id="namedview60"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="5.12"
+     inkscape:cx="99.902344"
+     inkscape:cy="100"
+     inkscape:window-width="1920"
+     inkscape:window-height="1168"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg58" />
+  <!-- head / body -->
+  <circle
+     cx="100"
+     cy="100"
+     r="30"
+     fill="darkorange"
+     id="circle2" />
+
+  <!-- Tentacle 1 -->
+  <g
+     id="g346"
+     transform="translate(-2.7749538,0.47941208)">
+    <ellipse
+       cx="72.294037"
+       cy="155.45325"
+       rx="8"
+       ry="12"
+       fill="#ffa500"
+       transform="rotate(-15)"
+       id="ellipse8" />
+    <ellipse
+       cx="70.490501"
+       cy="170.96426"
+       rx="6"
+       ry="10"
+       fill="#ffa500"
+       transform="rotate(-15)"
+       id="ellipse10" />
+    <ellipse
+       cx="72.883476"
+       cy="183.30576"
+       rx="4"
+       ry="8"
+       fill="#ffa500"
+       transform="rotate(-15)"
+       id="ellipse12" />
+    <ellipse
+       cx="148.99374"
+       cy="143.41788"
+       rx="2"
+       ry="6"
+       fill="#ffa500"
+       transform="rotate(10.794068)"
+       id="ellipse14" />
+  </g>
+  <!-- Tentacle 2 -->
+  <g
+     id="g409">
+    <ellipse
+       cx="123.21025"
+       cy="105.17479"
+       rx="8"
+       ry="12"
+       fill="#ffa500"
+       transform="rotate(15)"
+       id="ellipse16" />
+    <ellipse
+       cx="124.57233"
+       cy="120.5454"
+       rx="6"
+       ry="10"
+       fill="#ffa500"
+       transform="rotate(15)"
+       id="ellipse18" />
+    <ellipse
+       cx="122.69848"
+       cy="133.7874"
+       rx="4"
+       ry="8"
+       fill="#ffa500"
+       transform="rotate(15)"
+       id="ellipse20" />
+    <ellipse
+       cx="170.62082"
+       cy="76.039825"
+       rx="2"
+       ry="6"
+       fill="#ffa500"
+       transform="rotate(40.767975)"
+       id="ellipse22" />
+  </g>
+  <!-- Tentacle 3 -->
+  <g
+     id="g377">
+    <ellipse
+       cx="120"
+       cy="120"
+       rx="8"
+       ry="12"
+       fill="orange"
+       transform="rotate(-15, 120, 120)"
+       id="ellipse24" />
+    <ellipse
+       cx="125"
+       cy="135"
+       rx="6"
+       ry="10"
+       fill="orange"
+       transform="rotate(-15, 125, 135)"
+       id="ellipse26" />
+    <ellipse
+       cx="130"
+       cy="150"
+       rx="4"
+       ry="8"
+       fill="orange"
+       transform="rotate(-15, 130, 150)"
+       id="ellipse28" />
+    <ellipse
+       cx="137"
+       cy="161"
+       rx="2"
+       ry="6"
+       fill="orange"
+       transform="rotate(-29, 135, 165)"
+       id="ellipse30" />
+  </g>
+  <g
+     id="g667">
+    <ellipse
+       cx="48.942677"
+       cy="163.89923"
+       rx="8"
+       ry="12"
+       fill="#ffa500"
+       transform="rotate(-34.618528)"
+       id="ellipse24-6" />
+    <ellipse
+       cx="107.34346"
+       cy="153.39816"
+       rx="6"
+       ry="10"
+       fill="#ffa500"
+       transform="rotate(-15)"
+       id="ellipse26-7" />
+    <ellipse
+       cx="107.6209"
+       cy="166.97209"
+       rx="4"
+       ry="8"
+       fill="#ffa500"
+       transform="rotate(-15)"
+       id="ellipse28-5" />
+    <ellipse
+       cx="152.5045"
+       cy="140.13417"
+       rx="2"
+       ry="6"
+       fill="#ffa500"
+       transform="rotate(1.425995)"
+       id="ellipse30-3" />
+  </g>
+  <!-- Tentacle 4 -->
+  <g
+     id="g415"
+     transform="translate(-3.4152746,2.5219321)">
+    <ellipse
+       cx="80"
+       cy="120"
+       rx="8"
+       ry="12"
+       fill="#ffa500"
+       transform="rotate(15,80,120)"
+       id="ellipse32" />
+    <ellipse
+       cx="77"
+       cy="135"
+       rx="6"
+       ry="10"
+       fill="#ffa500"
+       transform="rotate(10,77,135)"
+       id="ellipse34" />
+    <ellipse
+       cx="115.40605"
+       cy="135.41989"
+       rx="3.9037406"
+       ry="8.2823143"
+       fill="#ffa500"
+       transform="matrix(0.98706966,0.16029186,-0.29973779,0.95402162,0,0)"
+       id="ellipse36"
+       style="stroke-width:1.00517" />
+    <ellipse
+       cx="136.33694"
+       cy="102.01284"
+       rx="2"
+       ry="6"
+       fill="#ffa500"
+       transform="rotate(29.853662)"
+       id="ellipse38" />
+  </g>
+  <!-- Tentacle 5 -->
+  <g
+     id="g661">
+    <ellipse
+       cx="-93.493004"
+       cy="131.83781"
+       rx="8"
+       ry="12"
+       fill="#ffa500"
+       transform="rotate(-92.867)"
+       id="ellipse24-62" />
+    <ellipse
+       cx="59.814354"
+       cy="167.38396"
+       rx="6"
+       ry="10"
+       fill="#ffa500"
+       transform="rotate(-38.578406)"
+       id="ellipse26-9" />
+    <ellipse
+       cx="126.47269"
+       cy="142.81531"
+       rx="4"
+       ry="8"
+       fill="#ffa500"
+       transform="rotate(-15)"
+       id="ellipse28-1" />
+    <ellipse
+       cx="148.43079"
+       cy="131.83583"
+       rx="2"
+       ry="6"
+       fill="#ffa500"
+       transform="rotate(-6.1355019)"
+       id="ellipse30-2" />
+  </g>
+  <g
+     id="g655">
+    <ellipse
+       cx="-119.66399"
+       cy="28.80673"
+       rx="8"
+       ry="12"
+       fill="#ffa500"
+       transform="matrix(-0.69649338,-0.71756322,-0.71756322,0.69649338,0,0)"
+       id="ellipse24-0" />
+    <ellipse
+       cx="-85.31633"
+       cy="101.90689"
+       rx="6"
+       ry="10"
+       fill="#ffa500"
+       transform="matrix(-0.96592583,-0.25881905,-0.25881905,0.96592583,0,0)"
+       id="ellipse26-93" />
+    <ellipse
+       cx="-84.909973"
+       cy="114.02911"
+       rx="4"
+       ry="8"
+       fill="#ffa500"
+       transform="matrix(-0.96592583,-0.25881905,-0.25881905,0.96592583,0,0)"
+       id="ellipse28-6" />
+    <ellipse
+       cx="-142.88051"
+       cy="39.404915"
+       rx="2"
+       ry="6"
+       fill="#ffa500"
+       transform="matrix(-0.55033924,-0.83494115,-0.83494115,0.55033924,0,0)"
+       id="ellipse30-0" />
+  </g>
+  <g
+     id="g927">
+    <ellipse
+       cx="-88.26088"
+       cy="-62.883751"
+       rx="8"
+       ry="12"
+       fill="#ffa500"
+       transform="matrix(-0.04569309,-0.99895553,-0.99895553,0.04569309,0,0)"
+       id="ellipse24-2" />
+    <ellipse
+       cx="-102.53432"
+       cy="22.012384"
+       rx="6"
+       ry="10"
+       fill="#ffa500"
+       transform="matrix(-0.65507899,-0.7555604,-0.7555604,0.65507899,0,0)"
+       id="ellipse26-6" />
+    <ellipse
+       cx="-70.167099"
+       cy="88.879288"
+       rx="4"
+       ry="8"
+       fill="#ffa500"
+       transform="matrix(-0.96592583,-0.25881905,-0.25881905,0.96592583,0,0)"
+       id="ellipse28-18" />
+    <ellipse
+       cx="-91.212189"
+       cy="79.391716"
+       rx="2"
+       ry="6"
+       fill="#ffa500"
+       transform="matrix(-0.87461971,-0.48480962,-0.48480962,0.87461971,0,0)"
+       id="ellipse30-7" />
+  </g>
+  <g
+     id="g873">
+    <circle
+       cx="90"
+       cy="90"
+       r="6"
+       fill="black"
+       id="circle4" />
+    <circle
+       cx="110"
+       cy="90"
+       r="6"
+       fill="black"
+       id="circle6" />
+    <circle
+       cx="90"
+       cy="99"
+       fill="#ff8c00"
+       id="circle2-9"
+       r="8.5"
+       style="stroke-width:0.28841" />
+    <circle
+       cx="110"
+       cy="99"
+       fill="#ff8c00"
+       id="circle2-9-2"
+       r="8.5"
+       style="stroke-width:0.28841" />
+  </g>
+</svg>
