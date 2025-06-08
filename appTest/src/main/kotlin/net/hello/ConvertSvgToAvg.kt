@@ -11,17 +11,25 @@ fun main(args: Array<String>) {
 
     val input = Path.of("crossplatform/src/desktopMain" + "/composeResources/drawable/logo.svg")
     val output = Path.of("crossplatform/src/androidMain" + "/res/drawable/logo.xml")
-    convert(input = input, output = output)
+    val error = convert(input = input, output = output)
 
     println("Input file     = '$input'")
     println("Generated file = '$output'")
+    println("Error message = '$error'")
 
 }
 
 
-private fun convert(input: Path, output: Path) {
+/**
+ * Converts an SVG file to an Android VectorDrawable XML file.
+ *
+ * @param input The path to the input SVG file.
+ * @param output The path where the generated XML file will be saved.
+ * @return Error message`
+ */
+private fun convert(input: Path, output: Path): String {
 
 
-    Svg2Vector.parseSvgToXml(input, output.outputStream())
+    return Svg2Vector.parseSvgToXml(input, output.outputStream())
 
 }
