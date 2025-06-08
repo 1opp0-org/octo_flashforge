@@ -1,10 +1,10 @@
 name: Build Desktop Uber JAR
 
-on: [push] # You can change this to trigger on other events like pull_request, schedule, etc.
+on: [push]
 
 jobs:
   build_uber_jar:
-    runs-on: ubuntu-latest # Specifies the runner environment
+    runs-on: ubuntu-24.04.02
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4 # Checks out your repository's code
@@ -14,6 +14,18 @@ jobs:
         with:
           java-version: '17'
           distribution: 'zulu' # Specifies Zulu JDK
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/gradle-wrapper.properties', '**/*.gradle*', '**/gradle.properties', '**/libs.versions.toml') }}
+          restore-keys: |
+              ${{ runner.os }}-gradle-${{ hashFiles('**/gradle-wrapper.properties') }}-
+              ${{ runner.os }}-gradle-
+
 
       - name: Build Uber JAR
         run: ./gradlew :appDesktop:packageUberJarForCurrentOS
