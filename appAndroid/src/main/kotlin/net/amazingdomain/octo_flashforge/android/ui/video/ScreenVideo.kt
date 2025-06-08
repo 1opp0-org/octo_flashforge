@@ -39,6 +39,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import net.amazingdomain.octo.crossplatform.ui.ImageLogo
 import timber.log.Timber
 
 // TODO extract user facing strings into proper structure to be shared with Desktop app
@@ -130,6 +131,8 @@ private fun VideoPreview() {
             style = typography.bodySmall,
             modifier = Modifier.align(Alignment.Center),
         )
+
+        ImageLogo()
     }
 }
 

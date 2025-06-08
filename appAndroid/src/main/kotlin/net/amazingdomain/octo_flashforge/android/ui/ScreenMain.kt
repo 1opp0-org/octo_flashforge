@@ -16,7 +16,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import net.amazingdomain.octo.gcode.ScreenMonitor
+import net.amazingdomain.octo.crossplatform.ui.ImageLogo
+import net.amazingdomain.octo.crossplatform.ui.ScreenMonitor
 import net.amazingdomain.octo_flashforge.android.ui.configuration.ScreenConfiguration
 import net.amazingdomain.octo_flashforge.android.ui.video.ScreenVideo
 import timber.log.Timber
@@ -38,6 +39,8 @@ fun ScreenMain(
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
         var configurationReloadCount by remember { mutableStateOf(0) }
+
+        ImageLogo()
 
         ScreenMonitor(temperatureState?.value)
 

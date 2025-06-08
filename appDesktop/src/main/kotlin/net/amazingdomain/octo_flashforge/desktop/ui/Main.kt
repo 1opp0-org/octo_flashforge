@@ -20,11 +20,12 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import mu.KotlinLogging
 import net.amazingdomain.octo.gcode.MonitorUseCase
-import net.amazingdomain.octo.gcode.ScreenMonitor
 import net.amazingdomain.octo.networking.ClientSocket
-import net.amazingdomain.octo_flashforge.desktop.ui.video.ScreenVideo
+import net.amazingdomain.octo.ui.ImageLogo
+import net.amazingdomain.octo.crossplatform.ui.ScreenMonitor
 import net.amazingdomain.octo_flashforge.crossplatform.ui.resources.Res
 import net.amazingdomain.octo_flashforge.crossplatform.ui.resources.logo
+import net.amazingdomain.octo_flashforge.desktop.ui.video.ScreenVideo
 import org.jetbrains.compose.resources.painterResource
 
 
@@ -84,6 +85,8 @@ fun main() = application {
         icon = painterResource(Res.drawable.logo),
     ) {
         App()
+
+        ImageLogo()
     }
 }
 
