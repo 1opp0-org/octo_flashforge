@@ -71,4 +71,6 @@ dependencies {
 
     // test
     testImplementation(libs.kotlin.test)
+    testImplementation(libs.mockk)
+
 }

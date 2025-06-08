@@ -1,19 +1,19 @@
-package net
+package net.amazingdomain.octo_flashforge.android.ui.configuration
 
-import net.amazingdomain.octo_flashforge.android.ui.configuration.ConfigurationRepository
+import io.mockk.mockk
+import net.amazingdomain.octo_flashforge.utils.TestTree
 import timber.log.Timber
 import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-// TODO move into proper package
 class ConfigurationRepositoryTest {
 
     init {
         Timber.plant(TestTree())
     }
 
-    private val repository = ConfigurationRepository()
+    private val repository = ConfigurationRepository(applicationContext = mockk())
 
     @Test
     fun `buildVideoUrl with valid IPv4 address returns correct URL`() {

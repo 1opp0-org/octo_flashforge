@@ -1,4 +1,4 @@
-package net
+package net.amazingdomain.octo_flashforge.utils
 
 import timber.log.Timber
 
