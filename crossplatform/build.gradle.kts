@@ -61,7 +61,6 @@ kotlin {
                 implementation(compose.ui)
                 implementation(compose.runtime)
                 implementation(compose.materialIconsExtended) // For more Material icons (optional)
-                implementation(compose.preview) // For @Preview annotations
 
                 implementation(compose.components.resources)
 
@@ -99,6 +98,8 @@ kotlin {
                 implementation(compose.preview)
                 implementation(compose.components.uiToolingPreview)
 
+                implementation(libs.androidx.compose.ui.tooling)
+                implementation(libs.androidx.compose.ui.tooling.preview)
             }
 
 
@@ -107,7 +108,8 @@ kotlin {
         desktopMain.apply {
 
             dependencies {
-
+                implementation(compose.preview)
+                implementation(compose.components.uiToolingPreview)
             }
         }
     }

@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/appAndroid" />
             <option value="$PROJECT_DIR$/appDesktop" />
+            <option value="$PROJECT_DIR$/appTest" />
             <option value="$PROJECT_DIR$/crossplatform" />
           </set>
         </option>

@@ -1,9 +1,11 @@
 package net.amazingdomain.octo_flashforge.android.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
@@ -39,8 +41,6 @@ fun ScreenMain(
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
         var configurationReloadCount by remember { mutableStateOf(0) }
-
-        ImageLogo()
 
         ScreenMonitor(temperatureState?.value)
 
