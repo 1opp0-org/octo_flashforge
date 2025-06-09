@@ -1,22 +1,33 @@
 package net.amazingdomain.octo_flashforge.android.ui.configuration
 
-import android.widget.Toast
+import android.content.res.Configuration
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import net.amazingdomain.octo_flashforge.android.ui.configuration.ConfigurationRepository.ConfigurationInfo
+import net.amazingdomain.octo_flashforge.android.ui.configuration.ConfigurationRepository.ConfigurationInfo.Companion.DEFAULT_GCODE_PORT
+import net.amazingdomain.octo_flashforge.android.ui.configuration.ConfigurationRepository.ConfigurationInfo.Companion.DEFAULT_VIDEO_PORT
+import net.amazingdomain.octo_flashforge.theme.OctoTheme
 import timber.log.Timber
 
-// TODO convert [Log] to [Timber]
 // TODO extract strings into proper structure to be shared with Desktop app
 // TODO refactor this into shared function to be used together with Desktop app
 // TODO Introduce DI
@@ -25,28 +36,33 @@ import timber.log.Timber
  * Provides a text field to type in the IP address of the printer, a button to save it to shared preferences,
  * and automatically loads the saved IP address when the screen is displayed.
  */
-@Preview
 @Composable
-fun ScreenConfiguration(onConfigurationChanged: () -> Unit) {
+fun ScreenConfiguration(
+    configurationInfo: ConfigurationInfo?,
+    loadAllConfigurations: () -> List<ConfigurationInfo>,
+    onDefaultConfigurationChanged: (ConfigurationInfo) -> Unit,
+    onConfigurationSaved: (ConfigurationInfo) -> Unit,
+) {
+    Timber.d("Recompose content 4 $configurationInfo" )
 
-    val configurationRepository = ConfigurationRepository(LocalContext.current.applicationContext)
+    var label by remember { mutableStateOf(TextFieldValue(configurationInfo?.label ?: "NONE")) }
 
-    val context = LocalContext.current
-    var ipAddress by remember { mutableStateOf(TextFieldValue("")) }
-    var label by remember { mutableStateOf(TextFieldValue("")) }
+    var ipAddress by remember {
+        mutableStateOf(
+            TextFieldValue(
+                configurationInfo?.ipAddress ?: "NONE"
+            )
+        )
+    }
+
     var showDialog by remember { mutableStateOf(false) }
 
 
-    LaunchedEffect(Unit) {
-        // Load the saved IP address and label when the screen is displayed
-        val (savedLabel, savedIp) = configurationRepository.loadActiveConfiguration()
-            ?: Pair("NONE", "NONE")
-        label = TextFieldValue(savedLabel)
-        ipAddress = TextFieldValue(savedIp)
-        Timber.i("LaunchedEffects Loaded saved IP: $savedIp, label: $savedLabel")
+    LaunchedEffect(configurationInfo) {
+        label = TextFieldValue(configurationInfo?.label ?: "NONE")
+        ipAddress = TextFieldValue(configurationInfo?.ipAddress ?: "NONE")
     }
 
-    Timber.i("Recomposing the whole thing")
 
     Column(modifier = Modifier.padding(16.dp)) {
         OutlinedTextField(
@@ -67,7 +83,16 @@ fun ScreenConfiguration(onConfigurationChanged: () -> Unit) {
         )
 
         Button(
-            onClick = { configurationRepository.saveConfiguration(label.text, ipAddress.text) },
+            onClick = {
+
+                val newConfigurationInfo = ConfigurationInfo(
+                    label = label.text,
+                    ipAddress = ipAddress.text,
+                    gcodePort = -1,
+                    videoPort = -1,
+                )
+                onConfigurationSaved(newConfigurationInfo)
+            },
             modifier = Modifier.padding(bottom = 8.dp)
         ) {
             Text("Save")
@@ -83,19 +108,9 @@ fun ScreenConfiguration(onConfigurationChanged: () -> Unit) {
     if (showDialog) {
 
         ShowStoredLabels(
-            configurationRepository.loadAllConfigurations(),
-            onSelect = { savedLabel ->
-                configurationRepository.saveActiveLabel(savedLabel)
-
-
-                Toast.makeText(context, "Selected configuration: $savedLabel", Toast.LENGTH_SHORT).show()
-                val (savedLabel, savedIp) = configurationRepository.loadActiveConfiguration()
-                    ?: Pair("NONE", "NONE")
-                label = TextFieldValue(savedLabel)
-                ipAddress = TextFieldValue(savedIp)
-
-                onConfigurationChanged()
-
+            loadAllConfigurations(),
+            onSelect = { newDefaultConfiguration ->
+                onDefaultConfigurationChanged(newDefaultConfiguration)
                 showDialog = false
             },
             onDismiss = {
@@ -104,14 +119,17 @@ fun ScreenConfiguration(onConfigurationChanged: () -> Unit) {
     }
 }
 
-@Preview
 @Composable
 fun ShowStoredLabels(
-    savedConfigs: List<Pair<String, String>>,
-    onSelect: (savedLabel: String) -> Unit,
+    savedConfigs: List<ConfigurationInfo>,
+    onSelect: (newDefaultConfiguration: ConfigurationInfo) -> Unit,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
+        modifier = Modifier.background(
+            color = MaterialTheme.colorScheme.surface,
+            shape = AbsoluteRoundedCornerShape(16.dp) as Shape
+        ),
         onDismissRequest = onDismiss,
         title = { Text("Saved Configurations") },
         text = {
@@ -120,11 +138,20 @@ fun ShowStoredLabels(
                     Text(
                         text = "$savedLabel: $savedIp",
                         modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.background,
+                                shape = AbsoluteRoundedCornerShape(8.dp),
+                            )
+
                             .clickable {
-                                onSelect(savedLabel)
+                                savedConfigs
+                                    .firstOrNull { it.label == savedLabel }
+                                    ?.let { onSelect(it) }
+
 
                             }
-                            .padding(vertical = 8.dp)
+                            .padding(all = 8.dp)
                     )
                 }
             }
@@ -136,3 +163,45 @@ fun ShowStoredLabels(
         }
     )
 }
+
+// region previews
+@Preview(showBackground = true)
+@Composable
+fun ScreenConfigurationPreview() {
+    OctoTheme {
+
+        ScreenConfiguration(
+            configurationInfo = null,
+            onDefaultConfigurationChanged = { },
+            onConfigurationSaved = {},
+            loadAllConfigurations = { emptyList() })
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+@Composable
+fun ShowStoredLabelsPreview() {
+    OctoTheme {
+
+        ShowStoredLabels(
+            savedConfigs = listOf(
+                ConfigurationInfo(
+                    "Printer 1",
+                    "ip address 2",
+                    gcodePort = DEFAULT_GCODE_PORT,
+                    videoPort = DEFAULT_VIDEO_PORT,
+                ),
+                ConfigurationInfo(
+                    "Printer 2",
+                    "ip address 2",
+                    gcodePort = DEFAULT_GCODE_PORT,
+                    videoPort = DEFAULT_VIDEO_PORT,
+                )
+            ),
+            onSelect = { _ -> },
+            onDismiss = {}
+        )
+    }
+}
+// endregion previews
+

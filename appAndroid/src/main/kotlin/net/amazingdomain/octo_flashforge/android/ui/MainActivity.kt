@@ -4,12 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -29,6 +29,8 @@ import net.amazingdomain.octo.crossplatform.ui.ImageLogo
 import net.amazingdomain.octo.gcode.MonitorUseCase
 import net.amazingdomain.octo.networking.ClientSocket
 import net.amazingdomain.octo_flashforge.android.ui.configuration.ConfigurationRepository
+import net.amazingdomain.octo_flashforge.android.ui.configuration.buildVideoUrl
+import net.amazingdomain.octo_flashforge.android.ui.configuration.getGcodeIpAddress
 import net.amazingdomain.octo_flashforge.theme.OctoTheme
 import timber.log.Timber
 
@@ -43,16 +45,17 @@ class MainActivity : ComponentActivity() {
         const val DISCONNECT_TIMEOUT_MS = MONITOR_INTERVAL_MS * 2
     }
 
-    private lateinit var configurationRepository: ConfigurationRepository
+    private var configurationRepository: ConfigurationRepository? = null
 
-    private var useCaseMonitorTemperature: MonitorUseCase? = null
     private var monitorRepository: ClientSocket? = null
 
     // TODO find a way to reconnect on resume
     override fun onResume() {
         super.onResume()
+
         CoroutineScope(Dispatchers.IO)
             .launch {
+                setupActivity()
                 monitorRepository?.ensureConnection()
             }
     }
@@ -68,59 +71,30 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        setupActivity()
+
+        setContent {
+            Content()
+        }
+
+    }
+
+    private fun setupActivity() {
+
+        Timber.d("Setting up MainActivity")
         // TODO this should be done by hilt
         configurationRepository = ConfigurationRepository(applicationContext = applicationContext)
 
-        monitorRepository = with(configurationRepository) {
-            getGcodeIpAddress() to getGcodeIpPort()
-        }
-            .let {
-                val host = it.first
-                val port = it.second
-                if (host != null && port != null) {
-                    ClientSocket(
-                        host = host,
-                        port = port,
-                        disconnectTimeoutMs = DISCONNECT_TIMEOUT_MS
-                    )
-                } else {
-                    Timber.e("Gcode IP address or port is not set in configuration")
-                    null
-                }
+        val configurationInfo = configurationRepository?.loadActiveConfiguration()
+
+        monitorRepository = configurationInfo
+            ?.let {
+                ClientSocket(
+                    host = it.getGcodeIpAddress(),
+                    port = it.gcodePort,
+                    disconnectTimeoutMs = DISCONNECT_TIMEOUT_MS
+                )
             }
-
-        setContent {
-
-            val temperatureState = monitorRepository
-                ?.let { MonitorUseCase(monitorRepository = it) }
-                ?.getExtruderTemperatureFlow(MONITOR_INTERVAL_MS)
-                ?.collectAsState(null)
-
-            val videoUrlState = remember {
-                mutableStateOf(configurationRepository.getVideoUrl())
-            }
-
-            OctoTheme {
-                Scaffold(
-                    topBar = TopBar, modifier = Modifier.fillMaxWidth()
-                ) { innerPadding ->
-
-                    Box(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .fillMaxSize()
-                    ) {
-
-                        ScreenMain(
-                            temperatureState = temperatureState,
-                            videoUrlState = videoUrlState,
-                        )
-                    }
-                }
-            }
-
-
-        }
 
     }
 
@@ -131,8 +105,11 @@ class MainActivity : ComponentActivity() {
             val topAppBarHeight = TopAppBarDefaults.MediumAppBarCollapsedHeight
 
             Row {
-                Box(modifier = Modifier.height(height = topAppBarHeight/2)
-                    .padding(end = 16.dp)) {
+                Box(
+                    modifier = Modifier
+                        .height(height = topAppBarHeight / 2)
+                        .padding(end = 16.dp)
+                ) {
                     ImageLogo()
                 }
                 Text("Octo Flash Forge")
@@ -140,9 +117,90 @@ class MainActivity : ComponentActivity() {
         })
     }
 
+    @Composable
+    fun Content() {
+        val configurationInfoState = remember {
+            mutableStateOf<ConfigurationRepository.ConfigurationInfo?>(null)
+        }
+
+        // TODO run this again when configuration changes
+        val temperatureState = monitorRepository
+            ?.let { MonitorUseCase(monitorRepository = it) }
+            ?.getExtruderTemperatureFlow(MONITOR_INTERVAL_MS)
+            ?.collectAsState(null)
+
+        val videoUrlState = remember {
+            mutableStateOf<String?>(null)
+        }
+
+        val onConfigurationSaved: (ConfigurationRepository.ConfigurationInfo) -> Unit =
+            { info ->
+                configurationRepository?.saveConfiguration(
+                    label = info.label,
+                    ipAddress = info.ipAddress
+                )
+            }
+
+        val onDefaultConfigurationChanged: (ConfigurationRepository.ConfigurationInfo?) -> Unit =
+            { newConfiguration ->
+
+                newConfiguration?.label
+                    ?.let { configurationRepository?.saveActiveLabel(it) }
+
+                configurationInfoState.value = newConfiguration
+
+                videoUrlState.value = newConfiguration?.buildVideoUrl()
+
+                setupActivity()
+
+            }
+
+        onDefaultConfigurationChanged(configurationRepository?.loadActiveConfiguration())
+
+
+
+        OctoTheme {
+            Scaffold(
+                topBar = TopBar, modifier = Modifier.fillMaxWidth()
+            ) { innerPadding ->
+
+                    Box(
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .fillMaxSize()
+                ) {
+
+                    ScreenMain(
+                        configurationInfoState = configurationInfoState,
+                        temperatureState = temperatureState,
+                        videoUrlState = videoUrlState,
+                        onConfigurationSaved = onConfigurationSaved,
+                        onDefaultConfigurationChanged = onDefaultConfigurationChanged,
+                        loadAllConfigurations = {
+                            configurationRepository?.loadAllConfigurations() ?: emptyList()
+                        }
+
+                    )
+                }
+            }
+        }
+    }
+
+    // region Preview
+
     @Preview
     @Composable
     private fun TopBarPreview() {
         TopBar()
     }
+
+    @Preview
+    @Composable
+    fun ContentPreview() {
+        OctoTheme {
+            Content()
+        }
+    }
+
+    // endregion Preview
 }

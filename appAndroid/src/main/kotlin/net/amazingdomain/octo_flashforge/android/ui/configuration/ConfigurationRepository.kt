@@ -3,6 +3,8 @@ package net.amazingdomain.octo_flashforge.android.ui.configuration
 import android.content.Context
 import androidx.core.content.edit
 import io.ktor.http.*
+import net.amazingdomain.octo_flashforge.android.ui.configuration.ConfigurationRepository.ConfigurationInfo.Companion.DEFAULT_GCODE_PORT
+import net.amazingdomain.octo_flashforge.android.ui.configuration.ConfigurationRepository.ConfigurationInfo.Companion.DEFAULT_VIDEO_PORT
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
@@ -24,11 +26,25 @@ class ConfigurationRepository(private val applicationContext: Context) {
         private const val KEY_LABEL = "label"
         private const val KEY_IP = "ip"
         private const val KEY_CURRENT_PRINTER_LABEL = "current_printer_label"
-        private const val KEY_CURRENT_PRINTER_IP = "current_printer_ip" // this seems wrong, scheduled to be removed
+        private const val KEY_CURRENT_PRINTER_IP =
+            "current_printer_ip" // this seems wrong, scheduled to be removed
+    }
+
+    data class ConfigurationInfo(
+        val label: String,
+        internal val ipAddress: String,
+        internal val gcodePort: Int,
+        internal val videoPort: Int,
+    ) {
+        companion object {
+            val DEFAULT_GCODE_PORT = 8899
+            val DEFAULT_VIDEO_PORT = 9090
+        }
     }
 
 
-    private fun getSharedPreferences() = applicationContext.getSharedPreferences(SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+    private fun getSharedPreferences() =
+        applicationContext.getSharedPreferences(SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
 
     fun saveConfiguration(label: String, ipAddress: String) {
         val prefs = getSharedPreferences()
@@ -66,22 +82,23 @@ class ConfigurationRepository(private val applicationContext: Context) {
         }
     }
 
+
     /**
      * Loads the active configuration based on the saved label.
      *
      * @return Pair of <label, IP address:IP port>, or null if not found.
      */
-    fun loadActiveConfiguration(): Pair<String, String>? {
+    fun loadActiveConfiguration(): ConfigurationInfo? {
 
         val activeLabel = getActiveLabel()
         return loadAllConfigurations()
-            .firstOrNull { it.first == activeLabel }
+            .firstOrNull { it.label == activeLabel }
             ?.also { Timber.d("Loaded active configuration: $it") }
 
 
     }
 
-    fun loadAllConfigurations(): List<Pair<String, String>> {
+    fun loadAllConfigurations(): List<ConfigurationInfo> {
         val prefs = getSharedPreferences()
         val configurationsJson = prefs.getString("saved_configurations", "[]")
         val configurations = JSONArray(configurationsJson)
@@ -90,9 +107,11 @@ class ConfigurationRepository(private val applicationContext: Context) {
 
         return List(configurations.length()) { i ->
             val config = configurations.getJSONObject(i)
-            Pair(
-                first = config.getString(KEY_LABEL).trim(),
-                second = config.getString(KEY_IP).trim()
+            ConfigurationInfo(
+                label = config.getString(KEY_LABEL).trim(),
+                ipAddress = config.getString(KEY_IP).trim(),
+                gcodePort = DEFAULT_GCODE_PORT,
+                videoPort = DEFAULT_VIDEO_PORT
             )
         }
     }
@@ -107,7 +126,7 @@ class ConfigurationRepository(private val applicationContext: Context) {
         Timber.d("Saved active label: $savedLabel")
     }
 
-    fun getActiveLabel(): String {
+    private fun getActiveLabel(): String {
         val prefs = getSharedPreferences()
         val activeLabel = prefs.getString(KEY_CURRENT_PRINTER_LABEL, "") ?: ""
 
@@ -115,67 +134,56 @@ class ConfigurationRepository(private val applicationContext: Context) {
         return activeLabel
     }
 
-    fun getVideoUrl(): String? {
 
-        return loadActiveConfiguration()
-            ?.second
-            ?.let { buildVideoUrl(it) }
-            ?.also { Timber.i("GET Video URL: $it") }
+}
 
-    }
+fun ConfigurationRepository.ConfigurationInfo.getGcodeIpAddress(): String {
 
-    fun getGcodeIpAddress(): String? {
-
-        return loadActiveConfiguration()
-            ?.second
-            ?.let {
-                // sample format of `it` is "192.168.0.10:9090"
-                // our quick fix is strip the port and return the rest
-                when {
-                    it.isEmpty() -> null
-                    it.startsWith("http") -> URLBuilder(it)
-                    else -> URLBuilder("http://$it")
-                }
-                    ?.host
+    return ipAddress
+        .let {
+            // sample format of `it` is "192.168.0.10:9090"
+            // our quick fix is strip the port and return the rest
+            when {
+                it.isEmpty() -> null
+                it.startsWith("http") -> URLBuilder(it)
+                else -> URLBuilder("http://$it")
             }
-            ?.also { Timber.i("GET Gcode IP address: $it") }
-
-    }
-
-    // TODO Store and retrieve from persistence
-    fun getGcodeIpPort(): Int? {
-
-        return 8899
-
-    }
-
-
-    /**
-     * Builds Url for accessing video live stream.
-     *
-     * Supports only FlashForge Adventurer 3: adds the action=stream query parameter to the given IP address.
-     */
-    fun buildVideoUrl(ipAddress: String): String? {
-
-
-        val urlBuilder = when {
-            ipAddress.isEmpty() -> null
-            ipAddress.startsWith("http") -> URLBuilder(ipAddress)
-            else -> URLBuilder("http://$ipAddress")
+                ?.host
         }
+        ?.also { Timber.i("GET Gcode IP address: $it") }
+        ?: throw RuntimeException("Something went wrong on 'getGcodeIpAddress()")
+}
 
-        Timber.i("Parsed URLBuilder: '${urlBuilder?.build()}' .. input was $ipAddress")
+fun ConfigurationRepository.ConfigurationInfo.getGcodeIpPort(): Int {
 
-        return urlBuilder
-            ?.apply {
-                encodedParameters = ParametersBuilder().apply {
-                    append("action", "stream")
-                }
-                appendPathSegments(listOf())
-            }
-            ?.build()
-            ?.also { Timber.i("Built URL: $it") }
-            ?.toString()
+    return ConfigurationRepository.ConfigurationInfo.DEFAULT_GCODE_PORT
+
+}
+
+/**
+ * Builds Url for accessing video live stream.
+ *
+ * Supports only FlashForge Adventurer 3: adds the action=stream query parameter to the given IP address.
+ */
+fun ConfigurationRepository.ConfigurationInfo.buildVideoUrl(): String? {
+
+
+    val urlBuilder = when {
+        ipAddress.isEmpty() -> null
+        ipAddress.startsWith("http") -> URLBuilder(ipAddress)
+        else -> URLBuilder("http://$ipAddress")
     }
 
+    Timber.i("Parsed URLBuilder: '${urlBuilder?.build()}' .. input was $ipAddress")
+
+    return urlBuilder
+        ?.apply {
+            encodedParameters = ParametersBuilder().apply {
+                append("action", "stream")
+            }
+            appendPathSegments(listOf())
+        }
+        ?.build()
+        ?.also { Timber.i("Built URL: $it") }
+        ?.toString()
 }

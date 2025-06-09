@@ -69,7 +69,6 @@ kotlin {
                 implementation(libs.ktor.io)
 
                 implementation(libs.kotlin.logging)
-
             }
         }
 

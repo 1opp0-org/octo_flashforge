@@ -5,7 +5,11 @@ import com.android.ide.common.vectordrawable.Svg2Vector
 import java.nio.file.Path
 import kotlin.io.path.outputStream
 
-
+/**
+ * Converts a single SVG file to a single Android VectorDrawable XML file.
+ *
+ * To convert a single SVG file to the multiple images used by the launcher icon wizard, see [LauncherIconGenerator] from https://cs.android.com/android-studio/platform/tools/adt/idea/+/mirror-goog-studio-main:android-npw/src/com/android/tools/idea/npw/assetstudio/LauncherIconGenerator.java
+ */
 fun main(args: Array<String>) {
     println("🛠️ Converts SVG files to Android VectorDrawable XML format")
 

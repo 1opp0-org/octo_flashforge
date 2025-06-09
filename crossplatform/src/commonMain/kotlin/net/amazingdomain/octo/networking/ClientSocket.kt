@@ -25,6 +25,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import java.io.IOException
+import java.nio.channels.UnresolvedAddressException
 
 /**
  * Creates a socket that can send and receive data.
@@ -46,6 +47,10 @@ class ClientSocket(
     private val disconnectTimeoutMs: Long = 1000L,
 ) {
 
+    class ClientSocketException(message: String, exception: RuntimeException) :
+        RuntimeException(message, exception) {
+        constructor(message: String) : this(message, RuntimeException(message))
+    }
 
     // TODO is this supposed to come from DI?
     private val logger by lazy { KotlinLogging.logger {} }
@@ -111,7 +116,14 @@ class ClientSocket(
         return try {
 
             val selectorManager = ActorSelectorManager(Dispatchers.IO)
-            val localSocket = aSocket(selectorManager).tcp().connect(host, port)
+            val localSocket = try {
+                aSocket(selectorManager).tcp().connect(host, port)
+            } catch (e: UnresolvedAddressException) {
+                throw ClientSocketException(
+                    "Cannot connect to $host:$port: Unresolved address. Please check the host and port.",
+                    e
+                )
+            }
             socketOutput =
                 localSocket.openWriteChannel(autoFlush = true) // autoFlush = true is convenient
 
@@ -211,7 +223,10 @@ class ClientSocket(
         logger.trace("Send data 2")
         // Send the message (ensure it's UTF-8 encoded)
         // Adding a newline is common for text-based protocols
-        assert(socketOutput != null) { "Socket should be initialized now " }
+        if ( socketOutput == null ) {
+            logger.error("Socket output is null, cannot send message to $host:$port")
+        }
+
         if (socket?.isActive == true && socketOutput?.isClosedForWrite != null) {
             socketOutput?.writeStringUtf8(message + "\n")
             logger.debug("Send data 3 - write successfully")
