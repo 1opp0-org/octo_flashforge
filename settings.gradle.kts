@@ -21,5 +21,6 @@ dependencyResolutionManagement {
 rootProject.name = "octo_flashforge"
 include(":appAndroid", ":appDesktop",
     ":crossplatform",
+    ":core",
     ":appTest",
 )

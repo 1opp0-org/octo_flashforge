@@ -2,6 +2,7 @@ package net.amazingdomain.octo_flashforge.desktop.ui
 
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
@@ -12,6 +13,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -84,9 +87,16 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         icon = painterResource(Res.drawable.logo),
     ) {
-        App()
+        Box() {
+            App()
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+            ) {
+                ImageLogo()
+            }
+        }
 
-        ImageLogo()
     }
 }
 
