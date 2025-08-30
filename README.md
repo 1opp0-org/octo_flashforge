@@ -97,6 +97,47 @@ Camera streaming
 socat -d -d TCP-LISTEN:9090,mss=1024,fork TCP:192.168.0.xxx:8080,mss=1024
 ```
 
+then point browser or equivalent to `http://localhost:9090/?action=stream`
+
+### Serial port from TCP
+
+`socat -d -d TCP-LISTEN:8899,mss=1024,fork TCP:192.168.0.xxx:8899,mss=1024`
+
+then create a serial port to your localhost 8899, giving it access to the group `dialout` (it assumes that your user is in group `dialout`, check it by running `groups`
+
+```shell
+> groups 
+... adm dialout cdrom sudo dip plugdev lpadmin sambashare docker
+
+```
+
+`sudo socat -d -d  pty,link=/dev/virtualcom0,raw,mode=660,group-late=dialout TCP:127.0.0.1:8899`
+
+
+then start reading from it with
+
+` cat /dev/virtualcom0 `
+
+` echo "~M105" > /dev/virtualcom0 `
+
+and finally, write to it and watch the response on the cat above, with 
+
+### Octoprint
+
+Download and install
+
+```
+python -m venv OctoPrint
+OctoPrint/bin/pip install OctoPrint
+```
+
+run
+
+`./OctoPrint/bin/octoprint serve`
+
+then open in browser on http://localhost:5000/
+
+
 ### Fat jar
 
 You can build a fat jar with 
