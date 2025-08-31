@@ -5,7 +5,7 @@ import kotlinx.coroutines.sync.withLock
 import mu.KotlinLogging
 
 /**
- * A stateful [ListenerProcessor] that processes streams of data and extracts newline-terminated lines.
+ * A stateful [ListenerWithProcessors.ListenerProcessor] that processes streams of data and extracts newline-terminated lines.
  *
  * This processor buffers incoming data until it finds a newline character ('\n').
  * When one or more complete lines are buffered, the `process` method returns them,
@@ -15,7 +15,7 @@ import mu.KotlinLogging
  *
  * This class is thread-safe.
  */
-class NewLineProcessor : ListenerProcessor {
+class NewLineProcessor : ListenerWithProcessors.ListenerProcessor {
 
     private val logger = KotlinLogging.logger {}
     private val mutex = Mutex()

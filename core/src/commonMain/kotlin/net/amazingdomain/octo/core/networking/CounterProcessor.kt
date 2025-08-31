@@ -5,13 +5,13 @@ import kotlinx.coroutines.sync.withLock
 import mu.KotlinLogging
 
 /**
- * A stateful [ListenerProcessor] that counts the cumulative number of lines and words from all processed inputs.
+ * A stateful [ListenerWithProcessors.ListenerProcessor] that counts the cumulative number of lines and words from all processed inputs.
  * The counts can be retrieved via the [getCounts] method.
  * The [process] function returns the input string unmodified.
  * The counts are logged at the trace level.
  * This class is thread-safe.
  */
-class CounterProcessor : ListenerProcessor {
+class CounterProcessor : ListenerWithProcessors.ListenerProcessor {
 
     private val logger = KotlinLogging.logger {}
     private val mutex = Mutex()
@@ -30,6 +30,7 @@ class CounterProcessor : ListenerProcessor {
             }
         }
 
+        logger.trace { "Processing '$input'" }
         logger.trace { "Processed input with $linesInBatch lines and $wordsInBatch words. New totals: Lines=$totalLines, Words=$totalWords" }
 
         return input

@@ -1,18 +1,19 @@
 package net.amazingdomain.octo.core.networking
 
+import io.mockk.coVerify
+import io.mockk.spyk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.time.DurationUnit
-import kotlin.time.toDuration
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ListenerWithProcessorsTest {
 
     private lateinit var listener: ListenerWithProcessors
-    private lateinit var counterProcessor: CounterProcessor
 
     @AfterTest
     fun tearDown() = runTest {
@@ -21,42 +22,55 @@ class ListenerWithProcessorsTest {
         }
     }
 
+    private suspend fun testMe(data: String) {}
+
     @Test
-    fun `when data is processed, counter processor should count correctly`() =
-        runTest(timeout = 5.toDuration(DurationUnit.SECONDS)) {
-            counterProcessor = CounterProcessor()
-            listener = ListenerWithProcessors(processors = listOf(counterProcessor))
+    fun `with no processors, listener should act as a pass-through buffer`() =
+        runTest(timeout = 5.seconds) {
+            val callback = spyk(::testMe)
+            listener = ListenerWithProcessors(processors = emptyList(), sink = callback)
+            listener.start()
 
-            val testData = "hello world\nthis is a test"
-            listener.write(testData)
+            listener.write("line 1")
+            listener.write("line 2")
 
-            val readData = listener.read()
-            assertEquals(expected = testData, actual = readData)
+            coVerify(exactly = 2) { callback(any()) }
+            coVerify { callback("line 1") }
+            coVerify { callback("line 2") }
 
-            val counts = counterProcessor.getCounts()
-            assertEquals(
-                expected = 2L to 6L,
-                actual = counts,
-                message = "The line and word counts should match the input data"
-            )
         }
 
     @Test
-    fun `when multiple data chunks are processed, counter processor should accumulate counts`() =
-        runTest(timeout = 5.toDuration(DurationUnit.SECONDS)) {
-            counterProcessor = CounterProcessor()
-            listener = ListenerWithProcessors(processors = listOf(counterProcessor))
+    fun `when multiple lines are processed, counter processor should accumulate counts`() =
+        runTest(timeout = 5.seconds) {
+            val counterProcessor = spyk(CounterProcessor())
+            val sink = mutableListOf<String>()
+            listener = ListenerWithProcessors(
+                processors = listOf(counterProcessor),
+                scope = this,
+                sink = { sink.add(it) }
+            )
+            listener.start()
 
             val testData1 = "first line"
             listener.write(testData1)
-            val readData1 = listener.read()
-            assertEquals(expected = testData1, actual = readData1)
-            assertEquals(expected = 1L to 2L, actual = counterProcessor.getCounts())
 
-            val testData2 = "second line with more words\n"
+            advanceUntilIdle()
+            coVerify { counterProcessor.process("first line") }
+            assertEquals(expected = 1L to 2L, actual = counterProcessor.getCounts())
+            assertEquals(expected = 1, sink.size)
+
+            val testData2 = "second line with more words"
             listener.write(testData2)
-            val readData2 = listener.read()
-            assertEquals(expected = testData2, actual = readData2)
-            assertEquals(expected = 3L to 7L, actual = counterProcessor.getCounts())
+
+            advanceUntilIdle()
+            listener.close()
+            assertEquals(
+                expected = 2L to 7L, // 1+1 lines, 2+5 words
+                actual = counterProcessor.getCounts()
+            )
+            coVerify { counterProcessor.process("second line with more words") }
+            assertEquals(expected = 2, sink.size)
         }
+
 }

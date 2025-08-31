@@ -44,6 +44,7 @@ kotlin {
                 implementation(libs.mockk)
                 implementation(libs.kotlinx.coroutines.test)
                 implementation(libs.kotlin.test)
+                implementation(libs.slf4j.simple)
             }
         }
 
