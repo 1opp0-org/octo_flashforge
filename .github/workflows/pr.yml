@@ -9,23 +9,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4 # Checks out your repository's code
 
-      - name: Set up Zulu JDK 17
+      - name: Set up Zulu JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'zulu' # Specifies Zulu JDK
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/gradle-wrapper.properties', '**/*.gradle*', '**/gradle.properties', '**/libs.versions.toml') }}
-          restore-keys: |
-              ${{ runner.os }}-gradle-${{ hashFiles('**/gradle-wrapper.properties') }}-
-              ${{ runner.os }}-gradle-
-
+#      - name: Cache Gradle packages
+#        uses: actions/cache@v4
+#        with:
+#          path: |
+#            ~/.gradle/caches
+#            ~/.gradle/wrapper
+#          key: ${{ runner.os }}-gradle-${{ hashFiles('**/gradle-wrapper.properties', '**/*.gradle*', '**/gradle.properties', '**/libs.versions.toml') }}
+#          restore-keys: |
+#              ${{ runner.os }}-gradle-${{ hashFiles('**/gradle-wrapper.properties') }}-
+#              ${{ runner.os }}-gradle-
 
       - name: Build Uber JAR
         run: ./gradlew :appDesktop:packageUberJarForCurrentOS
