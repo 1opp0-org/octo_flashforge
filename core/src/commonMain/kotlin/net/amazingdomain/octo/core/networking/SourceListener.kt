@@ -10,23 +10,10 @@ interface SourceListener {
      * For others, it might start a server or connect to a remote endpoint.
      * This function should be non-blocking.
      */
-    fun start()
-
-    /**
-     * Reads a line of data from the source.
-     * This method will suspend until data is available.
-     *
-     * @return The data read from the source.
-     *
-     * @throws IllegalOperationException if read is performed when
-     */
-    @Throws(IllegalOperationException::class)
-    suspend fun read(): String
+    suspend fun start()
 
     /** Closes the source and releases any underlying resources. */
     suspend fun close()
-    fun isOpenForRead(): Boolean
+    fun isOpen(): Boolean
 
-    class IllegalOperationException(message: String) :
-        IllegalStateException(message)
 }

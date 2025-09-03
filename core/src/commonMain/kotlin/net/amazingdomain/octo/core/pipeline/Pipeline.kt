@@ -42,7 +42,7 @@ class Pipeline(
      * This will start the source listener and begin processing data.
      * This function is non-blocking.
      */
-    fun start() {
+    suspend fun start() {
         if (pipelineJob?.isActive == true) {
             logger.warn { "Pipeline is already running." }
             return
@@ -56,12 +56,12 @@ class Pipeline(
             val sourceToProcessor = launch(scope.coroutineContext) {
                 logger.debug { "Starting source-to-processor flow." }
                 try {
-                    while (isActive && source.isOpenForRead()) {
-                        val input = source.read()
-                        processor.write(input)
+                    while (isActive && source.isOpen()) {
+
+//                        processor.write(input)
                     }
-                    logger.warn { "source.isOpenForRead() = ${source.isOpenForRead()} / scope isActive = $isActive" }
-                } catch (e: SourceListener.IllegalOperationException) {
+                   // logger.warn { "source.isOpenForRead() = ${source.isOpenForRead()} / scope isActive = $isActive" }
+                } catch (e: Exception) {
                     // No op, means no more data from source
                     // TODO shut down the pipeline
                 } finally {
