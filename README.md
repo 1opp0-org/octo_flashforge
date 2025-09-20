@@ -83,8 +83,14 @@ Note: assume for all instructions that you run `alias gw=./gradlew`
 
 The gradle way is `gw :appDesktop:run`
 
-It assumes you're forwarding to your printer with socat, so the desktop code only points to localhost
+By defaults it points to localhost:8899
 
+You can also specify host and port as command line parameters
+
+`gw :appDesktop:run --args="--host 192.168.0.11 --port 8899"`
+
+
+### Port forwarding
 Forward the TCP traffic with the following (replace xxx with your correct address):
 
 Data
@@ -147,6 +153,10 @@ You can build a fat jar with
 and then run it with 
 
 `java -jar ./appDesktop/build/compose/jars/net.amazingdomain.octo_flashforge-linux-x64-1.0.0.jar`
+
+in this case, host parameters would work like this:
+
+`java -jar ....jar --host 192.168.0.11 --port 8899`
 
 ## Distribution
 
