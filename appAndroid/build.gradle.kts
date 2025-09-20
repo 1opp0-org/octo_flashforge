@@ -63,6 +63,7 @@ dependencies {
     // other
     implementation(libs.ktor.client.core)
     implementation(libs.android.timber)
+    implementation(libs.slf4j.jdk14)
 
     ///////////////////////////////////////////////////////////////////////
     // development

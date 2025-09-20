@@ -13,7 +13,8 @@ import kotlin.coroutines.cancellation.CancellationException
 /**
  *
  */
-class MonitorUseCase(private val clientSocket: ClientSocket) {
+class MonitorUseCase(private val clientSocket: ClientSocket,
+    private val loopIntervalMs:Long = 500L) {
 
     private val logger = KotlinLogging.logger {}
 
@@ -50,7 +51,7 @@ class MonitorUseCase(private val clientSocket: ClientSocket) {
                 async {
                     logger.info("Starting to write gcode queries")
                     while (isActive) {
-                        delay(2000)
+                        delay(loopIntervalMs)
                         send(GCode.readTemperature)
                         logger.trace { "I'm in a loop" }
                     }
@@ -67,6 +68,7 @@ class MonitorUseCase(private val clientSocket: ClientSocket) {
         return try {
             parseResponse(response)
         } catch (t: Throwable) {
+            logger.warn { t }
             null
         }
             .also {
@@ -74,11 +76,13 @@ class MonitorUseCase(private val clientSocket: ClientSocket) {
             }
     }
 
-    private suspend fun send(gcode: GCode) {
-
-        clientSocket
-            .sendTextOverTcp(gcode.code)
-
+    private suspend fun send(gCode: GCode) {
+        try {
+            clientSocket
+                .sendTextOverTcp(gCode.code)
+        } catch (t: Throwable) {
+            logger.warn { t }
+        }
     }
 
     suspend fun disconnect() {
