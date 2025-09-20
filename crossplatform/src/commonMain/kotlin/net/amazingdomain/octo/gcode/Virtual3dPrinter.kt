@@ -1,7 +1,6 @@
 package net.amazingdomain.octo.gcode
 
 import kotlinx.coroutines.channels.Channel
-import net.amazingdomain.octo.testapplication.GCode
 
 
 /**

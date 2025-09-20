@@ -39,7 +39,7 @@ fun main(args: Array<String>) = application {
             host = host, port = port,
             disconnectTimeoutMs = statusUpdateIntervalMs * 2,
         )
-    val useCaseMonitorTemperature = MonitorUseCase(repository)
+    val monitorUseCase = MonitorUseCase(repository)
 
     val windowState = rememberWindowState()
 
@@ -52,6 +52,6 @@ fun main(args: Array<String>) = application {
         onCloseRequest = ::exitApplication,
         icon = painterResource(Res.drawable.logo),
     ) {
-        App(useCaseMonitorTemperature, statusUpdateIntervalMs)
+        App(monitorUseCase)
     }
 }

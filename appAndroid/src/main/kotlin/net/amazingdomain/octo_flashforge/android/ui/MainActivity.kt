@@ -125,8 +125,8 @@ class MainActivity : ComponentActivity() {
 
         // TODO run this again when configuration changes
         val temperatureState = monitorRepository
-            ?.let { MonitorUseCase(monitorRepository = it) }
-            ?.getExtruderTemperatureFlow(MONITOR_INTERVAL_MS)
+            ?.let { MonitorUseCase(clientSocket = it) }
+            ?.sharedFlow
             ?.collectAsState(null)
 
         val videoUrlState = remember {

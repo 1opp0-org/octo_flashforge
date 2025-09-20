@@ -19,14 +19,13 @@ import net.amazingdomain.octo_flashforge.desktop.ui.video.ScreenVideo
 
 @Composable
 @Preview
-fun App(useCaseMonitorTemperature: MonitorUseCase, statusUpdateIntervalMs: Long) {
+fun App(monitorUseCase: MonitorUseCase) {
 
     val text = remember { mutableStateOf("Hello, Desktop World!") }
 
-    val temperatureState = useCaseMonitorTemperature
-        .getExtruderTemperatureFlow(statusUpdateIntervalMs)
+    val gcodeResponse = monitorUseCase
+        .sharedFlow
         .collectAsState(null)
-
 
     MaterialTheme {
 
@@ -39,7 +38,7 @@ fun App(useCaseMonitorTemperature: MonitorUseCase, statusUpdateIntervalMs: Long)
             ) {
 
                 Button(onClick = {
-                    text.value= "Hello, Desktop!"
+                    text.value = "Hello, Desktop!"
                 }) {
                     Text(text.value)
                 }
@@ -52,8 +51,7 @@ fun App(useCaseMonitorTemperature: MonitorUseCase, statusUpdateIntervalMs: Long)
             }
 
             Column {
-                ScreenMonitor(temperatureState.value)
-
+                ScreenMonitor(gcodeResponse.value)
                 ScreenVideo()
             }
 

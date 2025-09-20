@@ -1,7 +1,6 @@
 package net.amazingdomain.octo.gcode
 
 import io.mockk.mockk
-import net.amazingdomain.octo.gcode.MonitorUseCase
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -13,7 +12,7 @@ class MonitorUseCaseTest {
     @Test
     fun `Given string When valid Then parse it`() {
 
-        val expected = MonitorUseCase.TemperatureQuery(
+        val expected = GCodeResponse.Temperature(
             extruderCurrentTemp = 40,
             baseCurrentTemp = 41,
             extruderTargetTemp = 42,

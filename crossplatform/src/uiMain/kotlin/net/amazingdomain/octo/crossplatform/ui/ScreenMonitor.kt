@@ -7,18 +7,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import net.amazingdomain.octo.gcode.GCodeResponse
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Preview
 @Composable
-fun ScreenMonitor(temperature: Int?) {
+fun ScreenMonitor(gCodeResponse: GCodeResponse?) {
 
     Box(modifier = Modifier.padding(16.dp)) {
 
         Column {
-
-            Text("Hello monitor from crossplatform")
-            Text("Temperature = " + (temperature ?: "unknown"))
+            Text("GCode response= " + (gCodeResponse ?: "unknown"))
         }
     }
 

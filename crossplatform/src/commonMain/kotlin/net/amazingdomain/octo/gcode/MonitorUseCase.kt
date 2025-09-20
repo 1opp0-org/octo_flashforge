@@ -1,69 +1,95 @@
 package net.amazingdomain.octo.gcode
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.mapNotNull
 import mu.KotlinLogging
 import net.amazingdomain.octo.networking.ClientSocket
-import net.amazingdomain.octo.testapplication.GCode
 import org.jetbrains.annotations.VisibleForTesting
+import kotlin.coroutines.cancellation.CancellationException
 
-class MonitorUseCase(private val monitorRepository: ClientSocket) {
+/**
+ *
+ */
+class MonitorUseCase(private val clientSocket: ClientSocket) {
 
     private val logger = KotlinLogging.logger {}
 
-    data class TemperatureQuery(
-        val extruderCurrentTemp: Int, val baseCurrentTemp: Int,
-        val extruderTargetTemp: Int, val baseTargetTemp: Int,
+    private val mutableFlow = MutableSharedFlow<GCodeResponse>(
+        replay = 0,
+        extraBufferCapacity = 100,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
-    fun getExtruderTemperatureFlow(intervalMs: Long = 500L): Flow<Int?> {
+    val sharedFlow = mutableFlow as Flow<GCodeResponse>
 
-        return flow {
-            while (true) {
+    private var listeningJob: Job? = null
 
-                val temp = getExtruderTemperature()
-                emit(temp)
-                logger.info { "Temperature reading is $temp" }
-                delay(intervalMs)
-            }
-
-        }
+    init {
+        listenForFlow()
     }
 
+    private fun listenForFlow() {
 
-    // TODO refactor and clean code, it can be much better
-    private suspend fun getExtruderTemperature(): Int? {
 
-        var response: TemperatureQuery? = null
+        listeningJob = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+            .launch {
 
-        withContext(Dispatchers.IO) {
+                async {
+                    logger.info("Starting to listen to socket")
+                    clientSocket
+                        .sharedFlow
+                        .mapNotNull { parseGcodeResponse(it) }
+                        .collect(mutableFlow)
 
-            val receiveJob = launch {
-                monitorRepository.sharedFlow
-                    .map { parseResponse(it) }
-                    .collect {
-                        if (it != null) {
-                            response = it
-                            coroutineContext.cancel() // Cancel the coroutine when a valid response is received
-                        }
+                    logger.info("End to listen to socket")
+                }
+
+                async {
+                    logger.info("Starting to write gcode queries")
+                    while (isActive) {
+                        delay(2000)
+                        send(GCode.readTemperature)
+                        logger.trace { "I'm in a loop" }
                     }
+                    logger.info("End loop writing queries")
+                }
             }
 
-            val sendJob =
-                launch { monitorRepository.sendTextOverTcp(GCode.Companion.readTemperature.code) }
+    }
 
-            receiveJob.join() // Wait for the response to be received and processed
-            sendJob.cancel()
+    private fun parseGcodeResponse(response: String?): GCodeResponse? {
+
+        logger.trace { "response raw  = $response" }
+
+        return try {
+            parseResponse(response)
+        } catch (t: Throwable) {
+            null
         }
+            .also {
+                logger.trace { "response gcode = $it" }
+            }
+    }
 
-        logger.debug { "7*   response $response" }
-        return response?.extruderCurrentTemp
+    private suspend fun send(gcode: GCode) {
+
+        clientSocket
+            .sendTextOverTcp(gcode.code)
+
+    }
+
+    suspend fun disconnect() {
+        logger.info("Disconnect")
+        listeningJob?.cancel(cause = CancellationException("Called from disconnect"))
+
+        clientSocket.disconnect()
+    }
+
+    fun parseResponse(gcodeResponse: String?): GCodeResponse? {
+        return parseTemperatureResponse(gcodeResponse)
     }
 
     /**
@@ -74,7 +100,7 @@ class MonitorUseCase(private val monitorRepository: ClientSocket) {
      *
      */
     @VisibleForTesting
-    internal fun parseResponse(gcodeResponse: String?): TemperatureQuery? {
+    internal fun parseTemperatureResponse(gcodeResponse: String?): GCodeResponse.Temperature? {
 
         if (gcodeResponse == null) return null
 
@@ -85,7 +111,8 @@ class MonitorUseCase(private val monitorRepository: ClientSocket) {
         return matchResult
             ?.let {
                 val (extruderCurrent, extruderTarget, baseCurrent, baseTarget) = it.destructured
-                TemperatureQuery(
+
+                GCodeResponse.Temperature(
                     extruderCurrentTemp = extruderCurrent.toInt(),
                     baseCurrentTemp = baseCurrent.toInt(),
                     extruderTargetTemp = extruderTarget.toInt(),
@@ -93,5 +120,13 @@ class MonitorUseCase(private val monitorRepository: ClientSocket) {
                 )
             }
     }
+}
 
+sealed class GCodeResponse {
+
+
+    data class Temperature(
+        val extruderCurrentTemp: Int, val baseCurrentTemp: Int,
+        val extruderTargetTemp: Int, val baseTargetTemp: Int,
+    ) : GCodeResponse()
 }

@@ -3,8 +3,8 @@ package net.amazingdomain.octo.testapplication
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 import mu.KotlinLogging
-import net.amazingdomain.octo.networking.ClientSocket
 import net.amazingdomain.octo.gcode.MonitorUseCase
+import net.amazingdomain.octo.networking.ClientSocket
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -15,18 +15,19 @@ fun main() {
     logger.debug("Hello network world")
 
     val socketWatchdogTimeoutMs = 300L
-    val repository = ClientSocket(
+    val clientSocket = ClientSocket(
+//        host = "192.168.0.11", port = 8899,
         host = "127.0.0.1", port = 8899,
         disconnectTimeoutMs = socketWatchdogTimeoutMs,
     )
 
-    val monitorUseCase = MonitorUseCase(repository)
+    val monitorUseCase = MonitorUseCase(clientSocket)
 
     val mainScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     val job = mainScope.launch {
         monitorUseCase
-            .getExtruderTemperatureFlow(1000L)
+            .sharedFlow
             .first()
             .let {
                 logger.info("1st Answer is '$it'C ")
@@ -37,13 +38,13 @@ fun main() {
             .let { delay(it) } // give enough time for disconnection to trigger auto timer
 
         monitorUseCase
-            .getExtruderTemperatureFlow(1000L)
+            .sharedFlow
             .first()
             .let {
                 logger.info("2nd Answer is '$it'C ")
             }
 
-        repository.disconnect()
+        monitorUseCase.disconnect()
     }
 
     runBlocking {
@@ -52,12 +53,3 @@ fun main() {
 
 }
 
-// TODO refactor in its own file
-data class GCode(val code: String) {
-
-    companion object {
-        val readTemperature = GCode("~M105")
-    }
-
-
-}

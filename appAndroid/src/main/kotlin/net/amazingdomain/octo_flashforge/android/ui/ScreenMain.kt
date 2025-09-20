@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.amazingdomain.octo.crossplatform.ui.ScreenMonitor
+import net.amazingdomain.octo.gcode.GCodeResponse
 import net.amazingdomain.octo_flashforge.android.ui.configuration.ConfigurationRepository.ConfigurationInfo
 import net.amazingdomain.octo_flashforge.android.ui.configuration.ScreenConfiguration
 import net.amazingdomain.octo_flashforge.android.ui.video.ScreenVideo
@@ -26,7 +27,7 @@ import timber.log.Timber
 @Composable
 fun ScreenMain(
     configurationInfoState: State<ConfigurationInfo?>,
-    temperatureState: State<Int?>?,
+    temperatureState: State<GCodeResponse?>?,
     videoUrlState: State<String?>,
     onDefaultConfigurationChanged: (ConfigurationInfo) -> Unit,
     onConfigurationSaved: (ConfigurationInfo) -> Unit,
@@ -68,7 +69,7 @@ fun ScreenMain(
 private fun PreviewScreenMain() {
     ScreenMain(
         configurationInfoState = remember { mutableStateOf(null) },
-        temperatureState = remember { mutableStateOf(210) },
+        temperatureState = remember { mutableStateOf(GCodeResponse.Temperature(200, 50, 210, 60)) },
         videoUrlState = remember { mutableStateOf("http://example.com/video.mp4") },
         onConfigurationSaved = {},
         onDefaultConfigurationChanged = {},

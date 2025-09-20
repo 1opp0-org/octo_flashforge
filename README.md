@@ -35,7 +35,7 @@ A quick way to check if the project is healthy is:
 A more complete and longer way is to run all tests:
 
 ```bash
-./gradlew :appDesktop:check :appAndroid:check
+gw check
 ```
 
 

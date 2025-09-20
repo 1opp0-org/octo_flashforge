@@ -27,42 +27,28 @@ kotlin {
     jvm("desktop") {
     }
 
-    androidTarget(){
+    androidTarget {
         publishLibraryVariants("release")
     }
 
 
     sourceSets {
 
-        val jvmMain by creating
-
-        val commonMain by getting
+        val commonMain by getting // domain models, logic and networking
         val commonTest by getting
-
-        val appTest by creating // applications made for testing the library
+        val uiMain by creating // all composables go here
 
         val androidMain by getting
         val desktopMain by getting
 
-        jvmMain.dependsOn(commonMain)
+        uiMain.dependsOn(commonMain)
 
-        androidMain.dependsOn(jvmMain)
-        desktopMain.dependsOn(jvmMain)
+        androidMain.dependsOn(uiMain)
+        desktopMain.dependsOn(uiMain)
 
         commonMain.apply {
 
             dependencies {
-
-
-                // Jetpack Compose for Desktop dependencies
-                implementation(compose.desktop.currentOs)
-                implementation(compose.foundation)
-                implementation(compose.material3)       // Material Design 3 components (optional, choose one or use both carefully)
-                implementation(compose.ui)
-                implementation(compose.runtime)
-                implementation(compose.materialIconsExtended) // For more Material icons (optional)
-
-                implementation(compose.components.resources)
 
                 implementation(libs.kotlinx.coroutines)
                 implementation(libs.ktor.network)
@@ -75,20 +61,26 @@ kotlin {
         commonTest.apply {
 
             dependencies {
-                implementation(libs.junit)
+                implementation(libs.junit5.api)
+                implementation(libs.junit5.engine.vintage)
                 implementation(libs.mockk)
             }
         }
 
-        jvmMain.apply {
+        uiMain.apply {
             dependencies {
-                implementation(compose.components.uiToolingPreview)
-            }
-        }
+                // Jetpack Compose for Desktop dependencies
+                implementation(compose.desktop.currentOs)
+                implementation(compose.foundation)
+                implementation(compose.ui)
+                implementation(compose.runtime)
 
-        appTest.apply {
-            dependencies {
-                implementation(libs.slf4j.simple) // this is only needed if you have applications in this module, which you shouldn't
+                implementation(compose.components.resources)
+
+                implementation(compose.material3)       // Material Design 3 components (optional, choose one or use both carefully)
+                implementation(compose.materialIconsExtended) // For more Material icons (optional)
+                implementation(compose.components.uiToolingPreview)
+
             }
         }
 
@@ -107,8 +99,6 @@ kotlin {
         desktopMain.apply {
 
             dependencies {
-                implementation(compose.preview)
-                implementation(compose.components.uiToolingPreview)
             }
         }
     }

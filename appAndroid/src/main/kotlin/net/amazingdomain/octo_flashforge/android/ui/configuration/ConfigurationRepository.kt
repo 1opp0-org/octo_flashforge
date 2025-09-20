@@ -182,6 +182,7 @@ fun ConfigurationRepository.ConfigurationInfo.buildVideoUrl(): String? {
                 append("action", "stream")
             }
             appendPathSegments(listOf())
+            port = videoPort
         }
         ?.build()
         ?.also { Timber.i("Built URL: $it") }
