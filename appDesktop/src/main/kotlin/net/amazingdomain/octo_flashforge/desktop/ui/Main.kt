@@ -2,16 +2,18 @@ package net.amazingdomain.octo_flashforge.desktop.ui
 
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -19,10 +21,10 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import mu.KotlinLogging
+import net.amazingdomain.octo.crossplatform.ui.ScreenMonitor
 import net.amazingdomain.octo.gcode.MonitorUseCase
 import net.amazingdomain.octo.networking.ClientSocket
 import net.amazingdomain.octo.ui.ImageLogo
-import net.amazingdomain.octo.crossplatform.ui.ScreenMonitor
 import net.amazingdomain.octo_flashforge.crossplatform.ui.resources.Res
 import net.amazingdomain.octo_flashforge.crossplatform.ui.resources.logo
 import net.amazingdomain.octo_flashforge.desktop.ui.video.ScreenVideo
@@ -51,10 +53,23 @@ fun App() {
 
         Column {
 
-            Button(onClick = {
-                text = "Hello, Desktop!"
-            }) {
-                Text(text)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Button(onClick = {
+                    text = "Hello, Desktop!"
+                }) {
+                    Text(text)
+                }
+
+                Box(
+                    modifier = Modifier.size(60.dp)
+                ) {
+                    ImageLogo()
+                }
             }
 
             Column {
@@ -85,8 +100,5 @@ fun main() = application {
         icon = painterResource(Res.drawable.logo),
     ) {
         App()
-
-        ImageLogo()
     }
 }
-
